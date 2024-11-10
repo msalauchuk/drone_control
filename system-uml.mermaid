@@ -1,0 +1,67 @@
+classDiagram
+    class RedisFun {
+        -redisContext* context
+        +connect(host: char*, port: int): bool
+        +publish(channel: char*, message: char*): bool
+        +subscribe(channel: char*): bool
+        +receive(): string
+        +getReply(): RedisReply
+    }
+
+    class RedisReply {
+        -redisReply* reply
+        +getString(): string
+        +getType(): int
+        +free(): void
+    }
+
+    class ControlCenter {
+        -RedisFun redis
+        -map~string, DroneInfo~ drones
+        +run(): void
+        +processDroneStatus(message: string): void
+        +sendCommand(droneId: string, command: string): void
+        -handleDroneRegistration(droneId: string): void
+    }
+
+    class Drone {
+        -string droneId
+        -RedisFun redis
+        -Position currentPos
+        -DroneStatus status
+        +start(): void
+        +updatePosition(x: double, y: double, z: double): void
+        +sendStatus(): void
+        -processCommand(command: string): void
+    }
+
+    class Position {
+        +double x
+        +double y
+        +double z
+    }
+
+    class DroneInfo {
+        +string id
+        +Position position
+        +DroneStatus status
+        +double battery
+        +timestamp lastUpdate
+    }
+
+    class DroneStatus {
+        <<enumeration>>
+        IDLE
+        FLYING
+        ERROR
+        CHARGING
+    }
+
+    ControlCenter --> RedisFun : uses
+    ControlCenter --> DroneInfo : manages
+    Drone --> RedisFun : uses
+    Drone --> Position : has
+    Drone --> DroneStatus : has
+    DroneInfo --> Position : has
+    DroneInfo --> DroneStatus : has
+    RedisFun --> RedisReply : creates
