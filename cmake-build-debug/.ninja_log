@@ -1,0 +1,17 @@
+# ninja log v6
+2	321	1731324710584614706	CMakeFiles/controllo_droni_master.dir/con2redis/src/readreply.cpp.o	f6fc4f2ee0154708
+2	323	1731324710584783913	CMakeFiles/controllo_droni_master.dir/con2redis/src/redisfun.cpp.o	7be9e5c58ee067c5
+590	746	1731329528374476261	drone	5e566738c0b1d5c7
+4	1037	1731324710585916691	CMakeFiles/controllo_droni_master.dir/control_center/src/ControlCenter.cpp.o	9295d5888a355fbf
+6	627	1731329527790276415	CMakeFiles/control_center.dir/control_center/src/main.cpp.o	da9d194edbeba6a3
+21	810	1731325226273381684	CMakeFiles/controllo_droni_master.dir/drone/src/main.cpp.o	f280edaadd18d40c
+2	261	1731328535087261068	CMakeFiles/common_lib.dir/con2redis/src/readreply.cpp.o	3883d8b5ba2cbed2
+23	639	1731325346886051418	CMakeFiles/controllo_droni_master.dir/drone/src/Drone.cpp.o	f92c4f087f433c70
+6	566	1731329527790531042	CMakeFiles/drone.dir/drone/src/main.cpp.o	2cbfc641217cef94
+6	590	1731329527790413833	CMakeFiles/drone.dir/drone/src/Drone.cpp.o	80c9e6488707b799
+3	261	1731328535088192492	CMakeFiles/common_lib.dir/con2redis/src/redisfun.cpp.o	8cda4529fd818e5f
+4	978	1731324710586237104	CMakeFiles/controllo_droni_master.dir/control_center/src/main.cpp.o	9363bdeeefb9e035
+5	684	1731329527789160785	CMakeFiles/control_center.dir/control_center/src/ControlCenter.cpp.o	826fa1dcc99475f9
+1	323	1731324710583480762	CMakeFiles/controllo_droni_master.dir/con2redis/src/old/readreply.cpp.o	2d68be2cbd4132fc
+261	316	1731328535346721800	libcommon_lib.a	64f03d25af95a62e
+684	746	1731329528467805396	control_center	b771ffcc689e01ab

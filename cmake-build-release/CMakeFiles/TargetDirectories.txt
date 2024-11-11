@@ -1,0 +1,5 @@
+/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/cmake-build-release/CMakeFiles/common_lib.dir
+/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/cmake-build-release/CMakeFiles/control_center.dir
+/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/cmake-build-release/CMakeFiles/drone.dir
+/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/cmake-build-release/CMakeFiles/edit_cache.dir
+/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/cmake-build-release/CMakeFiles/rebuild_cache.dir
