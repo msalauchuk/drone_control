@@ -1,13 +1,10 @@
-Makefile
 README.md
 
 
 
 ./con2redis/src:
-Makefile
 con2redis.h
 local.h
-old
 readreply.cpp
 redisfun.cpp
 

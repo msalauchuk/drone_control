@@ -30,33 +30,32 @@
   (redisReply*) redisCommand(fmt, __VA_ARGS__)
 
 
+redisReply* send_redis_msg(redisContext* c, char* stream_name, char* message);
 
-redisReply* send_redis_msg(redisContext *c , char * stream_name, char * message);
+redisReply* read_1msg(redisContext* c, const char* group, const char* consumer, const char* stream_name);
 
-redisReply* read_1msg(redisContext *c, const char * group, const char* consumer, const char *stream_name); 
+redisReply* read_1msg_blocking(redisContext* c, const char* group, const char* consumer, int block,
+                               const char* stream_name);
 
-redisReply* read_1msg_blocking(redisContext *c, const char * group, const char* consumer, int block, const char *stream_name); 
+void assertReplyType(redisContext* c, redisReply* r, int type);
 
-void assertReplyType(redisContext *c, redisReply *r, int type);
-
-void assertReply(redisContext *c, redisReply *r);
-
+void assertReply(redisContext* c, redisReply* r);
 
 
-void initStreams(redisContext *c, const char *stream);
+void initStreams(redisContext* c, const char* stream);
 
-void ReadStreamReply(redisReply *r, int indent, int readstatus);
+void ReadStreamReply(redisReply* r, int indent, int readstatus);
 
-int ReadStreamName(redisReply *r, char *streamname, long unsigned int k);
+int ReadStreamName(redisReply* r, char* streamname, long unsigned int k);
 
-int ReadNumStreams(redisReply *r);
+int ReadNumStreams(redisReply* r);
 
-int ReadStreamNumMsg(redisReply *r, long unsigned int streamnum);
+int ReadStreamNumMsg(redisReply* r, long unsigned int streamnum);
 
-int ReadStreamNumMsgID(redisReply *r, long unsigned int streamnum, int msgnum, char *msgid);
+int ReadStreamNumMsgID(redisReply* r, long unsigned int streamnum, int msgnum, char* msgid);
 
-int ReadStreamMsgNumVal(redisReply *r, long unsigned int streamnum, int msgnum);
+int ReadStreamMsgNumVal(redisReply* r, long unsigned int streamnum, int msgnum);
 
-int ReadStreamMsgVal(redisReply *r, long unsigned int streamnum, int msgnum, int entry, char *fval);
+int ReadStreamMsgVal(redisReply* r, long unsigned int streamnum, int msgnum, int entry, char* fval);
 
 #endif
