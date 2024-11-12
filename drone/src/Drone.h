@@ -1,7 +1,7 @@
 #ifndef DRONE_H
 #define DRONE_H
 #include "config.h"
-#include "../con2redis/src/con2redis.h"
+#include "con2redis.h"
 #include <vector>
 #include <math.h>
 #include <cstddef>

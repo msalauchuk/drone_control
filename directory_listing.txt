@@ -2,13 +2,6 @@ Makefile
 README.md
 
 
-./con2redis:
-obj
-src
-
-./con2redis/obj:
-readreply.o
-redisfun.o
 
 ./con2redis/src:
 Makefile
@@ -18,22 +11,7 @@ old
 readreply.cpp
 redisfun.cpp
 
-./con2redis/src/old:
-con2redis.h
-readreply.cpp
 
-./control_center:
-Makefile
-bin
-obj
-src
-
-./control_center/bin:
-control_center
-
-./control_center/obj:
-ControlCenter.o
-main.o
 
 ./control_center/src:
 ControlCenter.cpp
@@ -41,19 +19,6 @@ ControlCenter.h
 config.h
 main.cpp
 
-./drone:
-Makefile
-bin
-obj
-run.sh
-src
-
-./drone/bin:
-drone_simulation
-
-./drone/obj:
-Drone.o
-main.o
 
 ./drone/src:
 Drone.cpp

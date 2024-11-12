@@ -1,5 +1,5 @@
 #include "Drone.h"
-#include "../con2redis/src/con2redis.h"
+#include "con2redis.h"
 #include <hiredis/hiredis.h>
 
 const char *int_to_string(int x) {

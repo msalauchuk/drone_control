@@ -1,0 +1,10 @@
+# ninja log v6
+1	229	1731408811206297306	CMakeFiles/common_lib.dir/con2redis/src/readreply.cpp.o	56d98f2dd1991fa5
+2	230	1731408811207180742	CMakeFiles/common_lib.dir/con2redis/src/redisfun.cpp.o	65d560ba1ff8d9f5
+230	278	1731408811434836945	libcommon_lib.a	64f03d25af95a62e
+3	690	1731408811207706938	CMakeFiles/control_center.dir/control_center/src/main.cpp.o	bd86e09fdd4891
+2	756	1731408811207522568	CMakeFiles/control_center.dir/control_center/src/ControlCenter.cpp.o	c003f9965b32cdb4
+756	880	1731408811961081066	control_center	b771ffcc689e01ab
+2	566	1731408812575068644	CMakeFiles/drone.dir/drone/src/main.cpp.o	eba64fc1d6ce0f91
+2	592	1731408812574768027	CMakeFiles/drone.dir/drone/src/Drone.cpp.o	ed1e6eca686c20e0
+592	625	1731408813165126786	drone	5e566738c0b1d5c7
