@@ -49,19 +49,41 @@ cmake_ninja_workdir = /Users/maksimsolovchuk/uni/ingegneria$ del$ software/contr
 
 build cmake_object_order_depends_target_common_lib: phony || .
 
-build CMakeFiles/common_lib.dir/con2redis/src/readreply.cpp.o: CXX_COMPILER__common_lib_unscanned_Debug /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/con2redis/src/readreply.cpp || cmake_object_order_depends_target_common_lib
-  DEP_FILE = CMakeFiles/common_lib.dir/con2redis/src/readreply.cpp.o.d
-  FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.0.sdk -fcolor-diagnostics
+build CMakeFiles/common_lib.dir/con2redis/src/readreply.cpp.o.ddi: CXX_SCAN__common_lib_Debug /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/con2redis/src/readreply.cpp || cmake_object_order_depends_target_common_lib
+  DEP_FILE = CMakeFiles/common_lib.dir/con2redis/src/readreply.cpp.o.ddi.d
+  DYNDEP_INTERMEDIATE_FILE = CMakeFiles/common_lib.dir/con2redis/src/readreply.cpp.o.ddi
+  FLAGS = -fpermissive -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mmacosx-version-min=15.0 -fdiagnostics-color=always
   INCLUDES = -I/opt/homebrew/opt/hiredis/include -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/con2redis/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/control_center/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/drone/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master"
-  OBJECT_DIR = CMakeFiles/common_lib.dir
-  OBJECT_FILE_DIR = CMakeFiles/common_lib.dir/con2redis/src
+  OBJ_FILE = CMakeFiles/common_lib.dir/con2redis/src/readreply.cpp.o
+  PREPROCESSED_OUTPUT_FILE = CMakeFiles/common_lib.dir/con2redis/src/readreply.cpp.o.ddi.i
 
-build CMakeFiles/common_lib.dir/con2redis/src/redisfun.cpp.o: CXX_COMPILER__common_lib_unscanned_Debug /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/con2redis/src/redisfun.cpp || cmake_object_order_depends_target_common_lib
-  DEP_FILE = CMakeFiles/common_lib.dir/con2redis/src/redisfun.cpp.o.d
-  FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.0.sdk -fcolor-diagnostics
+build CMakeFiles/common_lib.dir/con2redis/src/readreply.cpp.o: CXX_COMPILER__common_lib_scanned_Debug /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/con2redis/src/readreply.cpp | CMakeFiles/common_lib.dir/con2redis/src/readreply.cpp.o.modmap || cmake_object_order_depends_target_common_lib CMakeFiles/common_lib.dir/CXX.dd
+  DEP_FILE = CMakeFiles/common_lib.dir/con2redis/src/readreply.cpp.o.d
+  DYNDEP_MODULE_MAP_FILE = CMakeFiles/common_lib.dir/con2redis/src/readreply.cpp.o.modmap
+  FLAGS = -fpermissive -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mmacosx-version-min=15.0 -fdiagnostics-color=always
   INCLUDES = -I/opt/homebrew/opt/hiredis/include -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/con2redis/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/control_center/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/drone/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master"
   OBJECT_DIR = CMakeFiles/common_lib.dir
   OBJECT_FILE_DIR = CMakeFiles/common_lib.dir/con2redis/src
+  dyndep = CMakeFiles/common_lib.dir/CXX.dd
+
+build CMakeFiles/common_lib.dir/con2redis/src/redisfun.cpp.o.ddi: CXX_SCAN__common_lib_Debug /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/con2redis/src/redisfun.cpp || cmake_object_order_depends_target_common_lib
+  DEP_FILE = CMakeFiles/common_lib.dir/con2redis/src/redisfun.cpp.o.ddi.d
+  DYNDEP_INTERMEDIATE_FILE = CMakeFiles/common_lib.dir/con2redis/src/redisfun.cpp.o.ddi
+  FLAGS = -fpermissive -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mmacosx-version-min=15.0 -fdiagnostics-color=always
+  INCLUDES = -I/opt/homebrew/opt/hiredis/include -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/con2redis/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/control_center/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/drone/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master"
+  OBJ_FILE = CMakeFiles/common_lib.dir/con2redis/src/redisfun.cpp.o
+  PREPROCESSED_OUTPUT_FILE = CMakeFiles/common_lib.dir/con2redis/src/redisfun.cpp.o.ddi.i
+
+build CMakeFiles/common_lib.dir/con2redis/src/redisfun.cpp.o: CXX_COMPILER__common_lib_scanned_Debug /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/con2redis/src/redisfun.cpp | CMakeFiles/common_lib.dir/con2redis/src/redisfun.cpp.o.modmap || cmake_object_order_depends_target_common_lib CMakeFiles/common_lib.dir/CXX.dd
+  DEP_FILE = CMakeFiles/common_lib.dir/con2redis/src/redisfun.cpp.o.d
+  DYNDEP_MODULE_MAP_FILE = CMakeFiles/common_lib.dir/con2redis/src/redisfun.cpp.o.modmap
+  FLAGS = -fpermissive -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mmacosx-version-min=15.0 -fdiagnostics-color=always
+  INCLUDES = -I/opt/homebrew/opt/hiredis/include -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/con2redis/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/control_center/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/drone/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master"
+  OBJECT_DIR = CMakeFiles/common_lib.dir
+  OBJECT_FILE_DIR = CMakeFiles/common_lib.dir/con2redis/src
+  dyndep = CMakeFiles/common_lib.dir/CXX.dd
+
+build CMakeFiles/common_lib.dir/CXX.dd | /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/cmake-build-debug/CMakeFiles/common_lib.dir/CXXModules.json CMakeFiles/common_lib.dir/con2redis/src/readreply.cpp.o.modmap CMakeFiles/common_lib.dir/con2redis/src/redisfun.cpp.o.modmap: CXX_DYNDEP__common_lib_Debug CMakeFiles/common_lib.dir/con2redis/src/readreply.cpp.o.ddi CMakeFiles/common_lib.dir/con2redis/src/redisfun.cpp.o.ddi | /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/cmake-build-debug/CMakeFiles/common_lib.dir/CXXDependInfo.json
 
 
 # =============================================================================
@@ -72,8 +94,8 @@ build CMakeFiles/common_lib.dir/con2redis/src/redisfun.cpp.o: CXX_COMPILER__comm
 # Link the static library libcommon_lib.a
 
 build libcommon_lib.a: CXX_STATIC_LIBRARY_LINKER__common_lib_Debug CMakeFiles/common_lib.dir/con2redis/src/readreply.cpp.o CMakeFiles/common_lib.dir/con2redis/src/redisfun.cpp.o
-  ARCH_FLAGS = -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.0.sdk
-  LANGUAGE_COMPILE_FLAGS = -g
+  ARCH_FLAGS = -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mmacosx-version-min=15.0
+  LANGUAGE_COMPILE_FLAGS = -fpermissive -g
   OBJECT_DIR = CMakeFiles/common_lib.dir
   POST_BUILD = :
   PRE_LINK = :
@@ -89,19 +111,41 @@ build libcommon_lib.a: CXX_STATIC_LIBRARY_LINKER__common_lib_Debug CMakeFiles/co
 
 build cmake_object_order_depends_target_control_center: phony || cmake_object_order_depends_target_common_lib
 
-build CMakeFiles/control_center.dir/control_center/src/ControlCenter.cpp.o: CXX_COMPILER__control_center_unscanned_Debug /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/control_center/src/ControlCenter.cpp || cmake_object_order_depends_target_control_center
-  DEP_FILE = CMakeFiles/control_center.dir/control_center/src/ControlCenter.cpp.o.d
-  FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.0.sdk -fcolor-diagnostics
+build CMakeFiles/control_center.dir/control_center/src/ControlCenter.cpp.o.ddi: CXX_SCAN__control_center_Debug /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/control_center/src/ControlCenter.cpp || cmake_object_order_depends_target_control_center
+  DEP_FILE = CMakeFiles/control_center.dir/control_center/src/ControlCenter.cpp.o.ddi.d
+  DYNDEP_INTERMEDIATE_FILE = CMakeFiles/control_center.dir/control_center/src/ControlCenter.cpp.o.ddi
+  FLAGS = -fpermissive -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mmacosx-version-min=15.0 -fdiagnostics-color=always
   INCLUDES = -I/opt/homebrew/opt/hiredis/include -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/con2redis/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/control_center/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/drone/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master"
-  OBJECT_DIR = CMakeFiles/control_center.dir
-  OBJECT_FILE_DIR = CMakeFiles/control_center.dir/control_center/src
+  OBJ_FILE = CMakeFiles/control_center.dir/control_center/src/ControlCenter.cpp.o
+  PREPROCESSED_OUTPUT_FILE = CMakeFiles/control_center.dir/control_center/src/ControlCenter.cpp.o.ddi.i
 
-build CMakeFiles/control_center.dir/control_center/src/main.cpp.o: CXX_COMPILER__control_center_unscanned_Debug /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/control_center/src/main.cpp || cmake_object_order_depends_target_control_center
-  DEP_FILE = CMakeFiles/control_center.dir/control_center/src/main.cpp.o.d
-  FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.0.sdk -fcolor-diagnostics
+build CMakeFiles/control_center.dir/control_center/src/ControlCenter.cpp.o: CXX_COMPILER__control_center_scanned_Debug /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/control_center/src/ControlCenter.cpp | CMakeFiles/control_center.dir/control_center/src/ControlCenter.cpp.o.modmap || cmake_object_order_depends_target_control_center CMakeFiles/control_center.dir/CXX.dd
+  DEP_FILE = CMakeFiles/control_center.dir/control_center/src/ControlCenter.cpp.o.d
+  DYNDEP_MODULE_MAP_FILE = CMakeFiles/control_center.dir/control_center/src/ControlCenter.cpp.o.modmap
+  FLAGS = -fpermissive -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mmacosx-version-min=15.0 -fdiagnostics-color=always
   INCLUDES = -I/opt/homebrew/opt/hiredis/include -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/con2redis/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/control_center/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/drone/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master"
   OBJECT_DIR = CMakeFiles/control_center.dir
   OBJECT_FILE_DIR = CMakeFiles/control_center.dir/control_center/src
+  dyndep = CMakeFiles/control_center.dir/CXX.dd
+
+build CMakeFiles/control_center.dir/control_center/src/main.cpp.o.ddi: CXX_SCAN__control_center_Debug /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/control_center/src/main.cpp || cmake_object_order_depends_target_control_center
+  DEP_FILE = CMakeFiles/control_center.dir/control_center/src/main.cpp.o.ddi.d
+  DYNDEP_INTERMEDIATE_FILE = CMakeFiles/control_center.dir/control_center/src/main.cpp.o.ddi
+  FLAGS = -fpermissive -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mmacosx-version-min=15.0 -fdiagnostics-color=always
+  INCLUDES = -I/opt/homebrew/opt/hiredis/include -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/con2redis/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/control_center/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/drone/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master"
+  OBJ_FILE = CMakeFiles/control_center.dir/control_center/src/main.cpp.o
+  PREPROCESSED_OUTPUT_FILE = CMakeFiles/control_center.dir/control_center/src/main.cpp.o.ddi.i
+
+build CMakeFiles/control_center.dir/control_center/src/main.cpp.o: CXX_COMPILER__control_center_scanned_Debug /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/control_center/src/main.cpp | CMakeFiles/control_center.dir/control_center/src/main.cpp.o.modmap || cmake_object_order_depends_target_control_center CMakeFiles/control_center.dir/CXX.dd
+  DEP_FILE = CMakeFiles/control_center.dir/control_center/src/main.cpp.o.d
+  DYNDEP_MODULE_MAP_FILE = CMakeFiles/control_center.dir/control_center/src/main.cpp.o.modmap
+  FLAGS = -fpermissive -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mmacosx-version-min=15.0 -fdiagnostics-color=always
+  INCLUDES = -I/opt/homebrew/opt/hiredis/include -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/con2redis/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/control_center/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/drone/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master"
+  OBJECT_DIR = CMakeFiles/control_center.dir
+  OBJECT_FILE_DIR = CMakeFiles/control_center.dir/control_center/src
+  dyndep = CMakeFiles/control_center.dir/CXX.dd
+
+build CMakeFiles/control_center.dir/CXX.dd | /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/cmake-build-debug/CMakeFiles/control_center.dir/CXXModules.json CMakeFiles/control_center.dir/control_center/src/ControlCenter.cpp.o.modmap CMakeFiles/control_center.dir/control_center/src/main.cpp.o.modmap: CXX_DYNDEP__control_center_Debug CMakeFiles/control_center.dir/control_center/src/ControlCenter.cpp.o.ddi CMakeFiles/control_center.dir/control_center/src/main.cpp.o.ddi | /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/cmake-build-debug/CMakeFiles/control_center.dir/CXXDependInfo.json
 
 
 # =============================================================================
@@ -112,7 +156,7 @@ build CMakeFiles/control_center.dir/control_center/src/main.cpp.o: CXX_COMPILER_
 # Link the executable control_center
 
 build control_center: CXX_EXECUTABLE_LINKER__control_center_Debug CMakeFiles/control_center.dir/control_center/src/ControlCenter.cpp.o CMakeFiles/control_center.dir/control_center/src/main.cpp.o | libcommon_lib.a || libcommon_lib.a
-  FLAGS = -g -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.0.sdk
+  FLAGS = -fpermissive -g -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mmacosx-version-min=15.0
   LINK_LIBRARIES = -Wl,-rpath,/opt/homebrew/opt/hiredis/lib  libcommon_lib.a  -lhiredis
   LINK_PATH = -L/opt/homebrew/opt/hiredis/lib
   OBJECT_DIR = CMakeFiles/control_center.dir
@@ -130,19 +174,41 @@ build control_center: CXX_EXECUTABLE_LINKER__control_center_Debug CMakeFiles/con
 
 build cmake_object_order_depends_target_drone: phony || cmake_object_order_depends_target_common_lib
 
-build CMakeFiles/drone.dir/drone/src/Drone.cpp.o: CXX_COMPILER__drone_unscanned_Debug /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/drone/src/Drone.cpp || cmake_object_order_depends_target_drone
-  DEP_FILE = CMakeFiles/drone.dir/drone/src/Drone.cpp.o.d
-  FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.0.sdk -fcolor-diagnostics
+build CMakeFiles/drone.dir/drone/src/Drone.cpp.o.ddi: CXX_SCAN__drone_Debug /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/drone/src/Drone.cpp || cmake_object_order_depends_target_drone
+  DEP_FILE = CMakeFiles/drone.dir/drone/src/Drone.cpp.o.ddi.d
+  DYNDEP_INTERMEDIATE_FILE = CMakeFiles/drone.dir/drone/src/Drone.cpp.o.ddi
+  FLAGS = -fpermissive -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mmacosx-version-min=15.0 -fdiagnostics-color=always
   INCLUDES = -I/opt/homebrew/opt/hiredis/include -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/con2redis/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/control_center/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/drone/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master"
-  OBJECT_DIR = CMakeFiles/drone.dir
-  OBJECT_FILE_DIR = CMakeFiles/drone.dir/drone/src
+  OBJ_FILE = CMakeFiles/drone.dir/drone/src/Drone.cpp.o
+  PREPROCESSED_OUTPUT_FILE = CMakeFiles/drone.dir/drone/src/Drone.cpp.o.ddi.i
 
-build CMakeFiles/drone.dir/drone/src/main.cpp.o: CXX_COMPILER__drone_unscanned_Debug /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/drone/src/main.cpp || cmake_object_order_depends_target_drone
-  DEP_FILE = CMakeFiles/drone.dir/drone/src/main.cpp.o.d
-  FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.0.sdk -fcolor-diagnostics
+build CMakeFiles/drone.dir/drone/src/Drone.cpp.o: CXX_COMPILER__drone_scanned_Debug /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/drone/src/Drone.cpp | CMakeFiles/drone.dir/drone/src/Drone.cpp.o.modmap || cmake_object_order_depends_target_drone CMakeFiles/drone.dir/CXX.dd
+  DEP_FILE = CMakeFiles/drone.dir/drone/src/Drone.cpp.o.d
+  DYNDEP_MODULE_MAP_FILE = CMakeFiles/drone.dir/drone/src/Drone.cpp.o.modmap
+  FLAGS = -fpermissive -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mmacosx-version-min=15.0 -fdiagnostics-color=always
   INCLUDES = -I/opt/homebrew/opt/hiredis/include -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/con2redis/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/control_center/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/drone/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master"
   OBJECT_DIR = CMakeFiles/drone.dir
   OBJECT_FILE_DIR = CMakeFiles/drone.dir/drone/src
+  dyndep = CMakeFiles/drone.dir/CXX.dd
+
+build CMakeFiles/drone.dir/drone/src/main.cpp.o.ddi: CXX_SCAN__drone_Debug /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/drone/src/main.cpp || cmake_object_order_depends_target_drone
+  DEP_FILE = CMakeFiles/drone.dir/drone/src/main.cpp.o.ddi.d
+  DYNDEP_INTERMEDIATE_FILE = CMakeFiles/drone.dir/drone/src/main.cpp.o.ddi
+  FLAGS = -fpermissive -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mmacosx-version-min=15.0 -fdiagnostics-color=always
+  INCLUDES = -I/opt/homebrew/opt/hiredis/include -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/con2redis/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/control_center/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/drone/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master"
+  OBJ_FILE = CMakeFiles/drone.dir/drone/src/main.cpp.o
+  PREPROCESSED_OUTPUT_FILE = CMakeFiles/drone.dir/drone/src/main.cpp.o.ddi.i
+
+build CMakeFiles/drone.dir/drone/src/main.cpp.o: CXX_COMPILER__drone_scanned_Debug /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/drone/src/main.cpp | CMakeFiles/drone.dir/drone/src/main.cpp.o.modmap || cmake_object_order_depends_target_drone CMakeFiles/drone.dir/CXX.dd
+  DEP_FILE = CMakeFiles/drone.dir/drone/src/main.cpp.o.d
+  DYNDEP_MODULE_MAP_FILE = CMakeFiles/drone.dir/drone/src/main.cpp.o.modmap
+  FLAGS = -fpermissive -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mmacosx-version-min=15.0 -fdiagnostics-color=always
+  INCLUDES = -I/opt/homebrew/opt/hiredis/include -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/con2redis/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/control_center/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/drone/src" -I"/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master"
+  OBJECT_DIR = CMakeFiles/drone.dir
+  OBJECT_FILE_DIR = CMakeFiles/drone.dir/drone/src
+  dyndep = CMakeFiles/drone.dir/CXX.dd
+
+build CMakeFiles/drone.dir/CXX.dd | /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/cmake-build-debug/CMakeFiles/drone.dir/CXXModules.json CMakeFiles/drone.dir/drone/src/Drone.cpp.o.modmap CMakeFiles/drone.dir/drone/src/main.cpp.o.modmap: CXX_DYNDEP__drone_Debug CMakeFiles/drone.dir/drone/src/Drone.cpp.o.ddi CMakeFiles/drone.dir/drone/src/main.cpp.o.ddi | /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/cmake-build-debug/CMakeFiles/drone.dir/CXXDependInfo.json
 
 
 # =============================================================================
@@ -153,7 +219,7 @@ build CMakeFiles/drone.dir/drone/src/main.cpp.o: CXX_COMPILER__drone_unscanned_D
 # Link the executable drone
 
 build drone: CXX_EXECUTABLE_LINKER__drone_Debug CMakeFiles/drone.dir/drone/src/Drone.cpp.o CMakeFiles/drone.dir/drone/src/main.cpp.o | libcommon_lib.a || libcommon_lib.a
-  FLAGS = -g -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.0.sdk
+  FLAGS = -fpermissive -g -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk -mmacosx-version-min=15.0
   LINK_LIBRARIES = -Wl,-rpath,/opt/homebrew/opt/hiredis/lib  libcommon_lib.a  -lhiredis
   LINK_PATH = -L/opt/homebrew/opt/hiredis/lib
   OBJECT_DIR = CMakeFiles/drone.dir
@@ -207,14 +273,14 @@ build all: phony libcommon_lib.a control_center drone
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja: RERUN_CMAKE | /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeCInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeCXXInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeCommonLanguageInclude.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeGenericSystem.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeInitializeConfigs.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeLanguageInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeSystemSpecificInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeSystemSpecificInitialize.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Compiler/AppleClang-C.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Compiler/AppleClang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Compiler/CMakeCommonCompilerMacros.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Compiler/Clang.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Compiler/GNU.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Apple-AppleClang-C.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Apple-AppleClang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Apple-Clang-C.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Apple-Clang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Apple-Clang.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Darwin-Initialize.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Darwin.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/UnixPaths.cmake /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/CMakeLists.txt CMakeCache.txt CMakeFiles/3.29.6/CMakeCCompiler.cmake CMakeFiles/3.29.6/CMakeCXXCompiler.cmake CMakeFiles/3.29.6/CMakeSystem.cmake
+build build.ninja: RERUN_CMAKE | /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeCInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeCXXInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeCommonLanguageInclude.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeGenericSystem.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeInitializeConfigs.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeLanguageInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeSystemSpecificInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeSystemSpecificInitialize.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Compiler/CMakeCommonCompilerMacros.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Compiler/GNU-C.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Compiler/GNU-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Compiler/GNU.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Apple-GNU-C.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Apple-GNU-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Apple-GNU.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Darwin-Initialize.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Darwin.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/UnixPaths.cmake /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/CMakeLists.txt CMakeCache.txt CMakeFiles/3.29.6/CMakeCCompiler.cmake CMakeFiles/3.29.6/CMakeCXXCompiler.cmake CMakeFiles/3.29.6/CMakeSystem.cmake
   pool = console
 
 
 #############################################
 # A missing CMake input file is not an error.
 
-build /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeCInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeCXXInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeCommonLanguageInclude.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeGenericSystem.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeInitializeConfigs.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeLanguageInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeSystemSpecificInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeSystemSpecificInitialize.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Compiler/AppleClang-C.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Compiler/AppleClang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Compiler/CMakeCommonCompilerMacros.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Compiler/Clang.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Compiler/GNU.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Apple-AppleClang-C.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Apple-AppleClang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Apple-Clang-C.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Apple-Clang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Apple-Clang.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Darwin-Initialize.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Darwin.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/UnixPaths.cmake /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/CMakeLists.txt CMakeCache.txt CMakeFiles/3.29.6/CMakeCCompiler.cmake CMakeFiles/3.29.6/CMakeCXXCompiler.cmake CMakeFiles/3.29.6/CMakeSystem.cmake: phony
+build /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeCInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeCXXInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeCommonLanguageInclude.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeGenericSystem.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeInitializeConfigs.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeLanguageInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeSystemSpecificInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/CMakeSystemSpecificInitialize.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Compiler/CMakeCommonCompilerMacros.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Compiler/GNU-C.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Compiler/GNU-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Compiler/GNU.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Apple-GNU-C.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Apple-GNU-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Apple-GNU.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Darwin-Initialize.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/Darwin.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.29/Modules/Platform/UnixPaths.cmake /Users/maksimsolovchuk/uni/ingegneria$ del$ software/controllo_droni-master/CMakeLists.txt CMakeCache.txt CMakeFiles/3.29.6/CMakeCCompiler.cmake CMakeFiles/3.29.6/CMakeCXXCompiler.cmake CMakeFiles/3.29.6/CMakeSystem.cmake: phony
 
 
 #############################################
