@@ -1,3 +1,19 @@
+# Build directories
 /cmake-build-debug/
 /cmake-build-debug-event-trace/
 /cmake-build-release/
+/build/
+
+# IDE files
+.idea/
+*.iml
+
+# Binary files
+*.o
+*.a
+*.so
+bin/
+
+# Backup files
+*~
+*.swp

@@ -1,5 +1,0 @@
-/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/cmake-build-debug-event-trace/CMakeFiles/common_lib.dir
-/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/cmake-build-debug-event-trace/CMakeFiles/control_center.dir
-/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/cmake-build-debug-event-trace/CMakeFiles/drone.dir
-/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/cmake-build-debug-event-trace/CMakeFiles/edit_cache.dir
-/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/cmake-build-debug-event-trace/CMakeFiles/rebuild_cache.dir

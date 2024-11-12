@@ -1,4 +1,0 @@
-/Applications/CLion.app/Contents/bin/cmake/mac/aarch64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/Applications/CLion.app/Contents/bin/ninja/mac/aarch64/ninja --profiling-format=google-trace --profiling-output=CMakeFiles/clion-event-trace.json -G Ninja -S "/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master" -B "/Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/cmake-build-debug-event-trace"
--- Configuring done (0.0s)
--- Generating done (0.0s)
--- Build files have been written to: /Users/maksimsolovchuk/uni/ingegneria del software/controllo_droni-master/cmake-build-debug-event-trace
