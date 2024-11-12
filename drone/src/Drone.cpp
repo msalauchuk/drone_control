@@ -1,6 +1,7 @@
 #include "Drone.h"
 #include "../con2redis/src/con2redis.h"
-#include <hiredis.h>
+#include <hiredis/hiredis.h>
+
 const char *int_to_string(int x) {
     return std::to_string(x).c_str();
 }

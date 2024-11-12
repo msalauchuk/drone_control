@@ -1,15 +1,15 @@
 
 
-#IDIR=../hdr
+# Directories
 IDIR=.
 ODIR=../obj
 BDIR=../bin
-
+# Compiler
 CC=g++
 # use this when connecting to Postgresql (library lpq)
 #CFLAGS=-std=c++11 -I. -I$(IDIR) -I/usr/include/postgresql -lpq -lm 
-CFLAGS=-g -ggdb -fpermissive -L/usr/local/lib -Wall -I. -I$(IDIR) -lm -lhiredis -L/usr/lib/hiredis/
-
+CFLAGS=-g -ggdb -fpermissive -Wall -I. -I$(IDIR) -I/opt/homebrew/include/
+LDFLAGS=-L/opt/homebrew/lib -lhiredis -lm
 # use this when no connection to Postgresql (library lpq) is needed
 #CFLAGS=-std=c++11 -I. -I$(IDIR) -lm 
 
