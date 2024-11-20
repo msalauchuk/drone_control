@@ -18,22 +18,26 @@
 #include <iostream>
 #include <fstream>
 #include <hiredis/hiredis.h>
-void save_to_csv(bool verified_area, int t , std::string filename);
+void save_to_csv(bool verified_area, int t, std::string filename);
 void print_parameters();
 bool is_verified(int last_v, int current_time); // checks single point
-const char * int_to_string(int x);
-typedef struct {
-    int sax; //subarea x 
+const char* int_to_string(int x);
+
+typedef struct
+{
+    int sax; //subarea x
     int say; //subarea y
-    int ny;  // next point of the subarea to start
-    int nx;  //
-    int dx;  // direction x
+    int ny; // next point of the subarea to start
+    int nx; //
+    int dx; // direction x
     int dy;
 } Job;
-void get_job_msg(const Job *my_job, char *buffer );
-Job * create_job(int sax, int say, int ny, int nx, int dx, int dy);
 
-enum drone_status{
+void get_job_msg(const Job* my_job, char* buffer);
+Job* create_job(int sax, int say, int ny, int nx, int dx, int dy);
+
+enum drone_status
+{
     IDLE_D,
     FLYING_D,
     HOMING_D,
@@ -41,45 +45,51 @@ enum drone_status{
 };
 
 
-class Drone {
+class Drone
+{
 private:
-    
     // pos x will be t.c. (x -10) congruo 0 mod 20
 
 public:
     // Costruttore
-    Drone( int did) {
+    Drone(int did)
+    {
         this->id = did;
         last_verified_x = -1;
-        last_verified_y = -1 ;
+        last_verified_y = -1;
         battery = 100.0;
         status = IDLE_D;
     }
-    int last_verified_y; // last verified post 
-    int last_verified_x; // last verified pos 
+
+    int last_verified_y; // last verified post
+    int last_verified_x; // last verified pos
     double battery; // Livello della batteria del drone
     int id;
     drone_status status; // Stato del drone
-    Job * job;
+    Job* job;
 };
-enum Status {
+
+enum Status
+{
     STARTUP,
     READY,
     RUNNING,
     STATUS_COUNT
 };
-class ControlCenter {
+
+class ControlCenter
+{
 private:
     int pid;
-    std::vector<Drone> drones;// vector of drones ids, make another drone class
+    std::vector<Drone> drones; // vector of drones ids, make another drone class
     std::vector<Job*> job_queue;
-    int grid[WIDTH][HEIGHT];// griglia 2d of time stamps in unix epoch, will be used to calculate verified time
-    Status status; 
+    int grid[WIDTH][HEIGHT]; // griglia 2d of time stamps in unix epoch, will be used to calculate verified time
+    Status status;
     bool area_verified;
-    redisContext *c;// redis conn
-    const char * sync_stream = "sync_stream1";
-    const char * drone_stream = "drone_stream";
-    const char * log_stream = "log_stream";
+    redisContext* c; // redis conn
+    const char* sync_stream = "sync_stream1";
+    const char* drone_stream = "drone_stream";
+    const char* log_stream = "log_stream";
     int block_time = 10000000; //timeout redis msgs
 
 public:
@@ -93,7 +103,7 @@ public:
     void init();
     void await_sync();
     void tick();
-    void handle_msg(const char * type, redisReply * reply);
+    void handle_msg(const char* type, redisReply* reply);
     void log(int time);
     void shutdown();
 
@@ -101,10 +111,9 @@ public:
     void divide_tasks(); // assign the subareas to the available drones
     int get_available_drone_id();
 
-    // sub areas must be of a max of 250 points - or if sqrt(250) = l, lxl -1 // 
-    bool check_area(int t); // checks whether a point has been verified in the last 5 min, if not logs functional requisite has been violeted - checks every point on the grid 
-
-
+    // sub areas must be of a max of 250 points - or if sqrt(250) = l, lxl -1 //
+    bool check_area(int t);
+    // checks whether a point has been verified in the last 5 min, if not logs functional requisite has been violeted - checks every point on the grid
 
 
     // ...
