@@ -17,7 +17,7 @@ bin/
 # Backup files
 *~
 *.swp
-
+dump.rdb
 
 /test/venv/lib/python3.9/site-packages/_distutils_hack/__init__.py
 /test/venv/lib/python3.9/site-packages/_distutils_hack/override.py
