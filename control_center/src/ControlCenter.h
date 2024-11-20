@@ -101,7 +101,7 @@ public:
     void print_status();
     void addDrone(Drone drone);
     void init();
-    void await_sync();
+    void sync_and_wait();
     void tick();
     void handle_msg(const char* type, redisReply* reply);
     void log(int time);

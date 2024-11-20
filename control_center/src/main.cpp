@@ -33,15 +33,15 @@ int main(int argc, char* argv[])
     print_parameters(); //print parameters to stdoutput for readability
 
     //Itera per ogni timestep fino a HORIZON
-    for (int t = 0; t < HORIZON; t++)
+    for (int timeStep = 0; timeStep < HORIZON; timeStep++)
     {
-        printf("______________________\nt =  %d\n\n", t);
+        printf("______________________\nt =  %d\n\n", timeStep);
 
         // Attende la sincronizzazione con Redis
         // Questo è un punto di sincronizzazione bloccante che garantisce
         // la consistenza dello stato tra tutti i componenti del sistema
 
-        cc.await_sync(); // sync bloccante con redis
+        cc.sync_and_wait();
         //cc.print_status();
 
         // Esegue le azioni del centro di controllo per l'istante corrente:
@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
         // - Salva i dati di stato
         // - Verifica proprietà funzionali
         // - Controlla metriche non funzionali
-        cc.log(t); // logs data + monitors
+        cc.log(timeStep); // logs data + monitors
     }
 
     // Stampa messaggio di completamento se in modalità debug
