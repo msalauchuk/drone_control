@@ -87,10 +87,10 @@ private:
     Status status;
     bool area_verified;
     redisContext* c; // redis conn
-    const char* sync_stream = "sync_stream1";
+    const char* droneResponseStream = "sync_stream1";
     const char* drone_stream = "drone_stream";
     const char* log_stream = "log_stream";
-    int block_time = 10000000; //timeout redis msgs
+    int syncTimeout = 10000000; //timeout redis msgs
 
 public:
     ControlCenter();

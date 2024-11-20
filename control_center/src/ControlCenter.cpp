@@ -51,13 +51,18 @@ void ControlCenter::init_grid()
 
 void ControlCenter::init()
 {
-    //setup conn to redis
+    /* FASE 1: INIZIALIZZAZIONE VARIABILI BASE */
     this->pid = getpid();
     init_grid();
-    const char* hostname = "127.0.0.1";
-    int port = 6379;
+    // Configurazione connessione Redis
+    const char* hostname = "127.0.0.1"; // localhost
+    int port = 6379; //  default port
+
     status = STARTUP;
     area_verified = 0;
+
+    /* FASE 2: CONNESSIONE A REDIS */
+    // Tenta la connessione al server Redis
     this->c = redisConnect(hostname, port);
     if (c == NULL || c->err)
     {
@@ -72,49 +77,59 @@ void ControlCenter::init()
         }
         exit(1);
     }
-    //cleans results
 
+
+    /* FASE 3: INIZIALIZZAZIONE FILE DI LOG */
+    // Crea/sovrascrive il file di test per i risultati
     std::ofstream outputFile(TEST_PATH); // Open the file for writing (overwrite mode)
+
+    // Scrive header del CSV
     outputFile << "verified_area,t\n"; // Write the string to the file
     outputFile.close();
 
-    //set up sync streams
+    /* FASE 4: SETUP STREAMS DI SINCRONIZZAZIONE */
     redisReply* reply;
-    reply = (redisReply*)redisCommand(c, "DEL %s", sync_stream);
+
+    // Stream per risposte dai droni
+    reply = (redisReply*)redisCommand(c, "DEL %s", droneResponseStream);
     assertReplyType(c, reply, REDIS_REPLY_INTEGER);
-    initStreams(c, sync_stream);
+    initStreams(c, droneResponseStream);
     freeReplyObject(reply);
 
+    // Stream per messaggi dal centro di controllo
     reply = (redisReply*)redisCommand(c, "DEL %s", "sync_stream2");
     assertReplyType(c, reply, REDIS_REPLY_INTEGER);
     initStreams(c, "sync_stream2");
     freeReplyObject(reply);
 
-    //set up stream for receiving from drone
+    // Stream per comunicazioni generali dai droni
     reply = (redisReply*)redisCommand(c, "DEL %s", drone_stream);
     assertReplyType(c, reply, REDIS_REPLY_INTEGER);
     initStreams(c, drone_stream);
     freeReplyObject(reply);
 
-    //set up log stream
+    //log stream
     reply = (redisReply*)redisCommand(c, "DEL %s", log_stream);
     assertReplyType(c, reply, REDIS_REPLY_INTEGER);
     initStreams(c, log_stream);
     freeReplyObject(reply);
 
-    //set up streams to send to a single drone create one stream for each drone
+    /* FASE 5: SETUP STREAMS INDIVIDUALI PER OGNI DRONE */
+    // Crea uno stream dedicato per ogni drone
     for (int i = 0; i < DRONES_COUNT; i++)
     {
         const char* str = int_to_string(i);
         printf("key : %s\n", str);
+
+        // Elimina stream esistente se presente
         reply = (redisReply*)redisCommand(c, "DEL %d", i);
         assertReplyType(c, reply, REDIS_REPLY_INTEGER);
         freeReplyObject(reply);
-        //initStreams(c , str);
-        reply = RedisCommand(c, "XGROUP CREATE %d diameter $ MKSTREAM", i);
-        //dumpReply(reply,0);
-        assertReply(c, reply);
 
+
+        // Crea nuovo stream con gruppo consumer
+        reply = RedisCommand(c, "XGROUP CREATE %d diameter $ MKSTREAM", i);
+        assertReply(c, reply);
         freeReplyObject(reply);
     }
 }
@@ -141,16 +156,16 @@ void ControlCenter::sync_and_wait()
 
 
     // "*" indica a Redis di generare automaticamente un ID per il messaggio
-    const char* message_id = "*"; // Send to the latest message in the stream
+    const char* messageId = "*";
     // Messaggio di sincronizzazione semplice
-    const char* message = "Sync";
+    const char* syncMessage = "Sync";
 
     // Esegue comando Redis XADD per aggiungere messaggio allo stream
     // sync_stream2: nome dello stream
     // message_id: ID del messaggio ("*" per auto-generazione)
     // type: campo del messaggio
     // message: valore del campo type
-    reply = (redisReply*)redisCommand(c, "XADD %s %s type %s", "sync_stream2", message_id, message);
+    reply = (redisReply*)redisCommand(c, "XADD %s %s type %s", "sync_stream2", messageId, syncMessage);
     if (DEBUG)
     {
         //dumpReply(reply,0);
@@ -168,16 +183,15 @@ void ControlCenter::sync_and_wait()
     // Legge un messaggio in modo bloccante dallo stream
     // diameter: nome gruppo consumatori
     // cc: ID consumatore
-    // block_time: tempo massimo di attesa
+    // syncTimeout: tempo massimo di attesa
 
     //# Lettura bloccante (CC attende risposta)
-    reply = read_1msg_blocking(c, "diameter", "cc", block_time, sync_stream);
+    reply = read_1msg_blocking(c, "diameter", "cc", syncTimeout, droneResponseStream);
 
     // Verifica validità della risposta
     assertReply(c, reply);
     //dumpReply(reply,0);
     freeReplyObject(reply);
-
 }
 
 void get_job_msg(Job* my_job, char* buffer)
@@ -690,7 +704,7 @@ void ControlCenter::shutdown()
     assertReply(c, reply);
     freeReplyObject(reply);
 
-    reply = (redisReply*)redisCommand(c, "DEL %s", sync_stream);
+    reply = (redisReply*)redisCommand(c, "DEL %s", droneResponseStream);
     assertReply(c, reply);
     freeReplyObject(reply);
 
