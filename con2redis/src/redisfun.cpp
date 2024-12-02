@@ -1,6 +1,9 @@
 #include "con2redis.h"
 #include "local.h"
 
+
+// Utility function to print all Redis reply types for debugging
+
 void print_reply_types()
 {
     printf("REDIS_REPLY_STRING=%d,\
@@ -19,6 +22,9 @@ REDIS_REPLY_ARRAY=%d\n",
 }
 
 
+// Validates that a Redis reply is of the expected type
+// Aborts if reply is NULL or doesn't match expected type
+
 void assertReplyType(redisContext* c, redisReply* r, int type)
 {
     if (r == NULL)
@@ -31,6 +37,9 @@ void assertReplyType(redisContext* c, redisReply* r, int type)
 }
 
 
+// Simple validation that a Redis reply exists
+// Aborts if reply is NULL
+
 void assertReply(redisContext* c, redisReply* r)
 {
     if (r == NULL)
@@ -38,13 +47,22 @@ void assertReply(redisContext* c, redisReply* r)
 }
 
 
+// Reads a single message from a Redis stream using consumer groups
+// Non-blocking read
+
 redisReply* read_1msg(redisContext* c, const char* group, const char* consumer, const char* stream_name)
 {
     redisReply* reply = (redisReply*)redisCommand(c, "XREADGROUP GROUP %s %s COUNT 1 NOACK STREAMS %s >",
-                                                  group, consumer, stream_name);
+                                                  group, // Consumer group name
+                                                  consumer, // Consumer name within the group
+                                                  stream_name // Stream to read from
+                                                  );
     assertReply(c, reply);
     return reply;
 }
+
+// Reads a single message from a Redis stream using consumer groups
+// Blocking read with timeout
 
 redisReply* read_1msg_blocking(redisContext* c, const char* group, const char* consumer, int block,
                                const char* stream_name)
@@ -54,7 +72,7 @@ redisReply* read_1msg_blocking(redisContext* c, const char* group, const char* c
         "XREADGROUP GROUP %s %s COUNT 1 BLOCK %d NOACK STREAMS %s >",
         group,
         consumer,
-        block,
+        block, // Time to block/wait in milliseconds
         stream_name
 
     );
@@ -63,13 +81,16 @@ redisReply* read_1msg_blocking(redisContext* c, const char* group, const char* c
     return reply;
 }
 
+
+// Sends a message to a Redis stream
+
 redisReply* send_redis_msg(redisContext* c, char* stream_name, char* message)
 {
     redisReply* reply = (redisReply*)redisCommand(
         c,
-        "XADD %s * type %s",
-        stream_name,
-        message
+        "XADD %s * type %s", // Add entry to stream with auto-generated ID (*)
+        stream_name, // Stream to write to
+        message // Message content
     );
 
     assertReply(c, reply);
@@ -78,7 +99,9 @@ redisReply* send_redis_msg(redisContext* c, char* stream_name, char* message)
 
 void initStreams(redisContext* c, const char* stream)
 {
-    redisReply* r = RedisCommand(c, "XGROUP CREATE %s diameter $ MKSTREAM", stream);
+    redisReply* r = RedisCommand(c, ""
+                                    "XGROUP CREATE %s diameter $ MKSTREAM", // Create group and stream if needed
+                                    stream);
     assertReply(c, r);
     freeReplyObject(r);
 }

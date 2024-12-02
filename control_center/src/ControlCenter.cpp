@@ -380,14 +380,21 @@ void ControlCenter::tick()
                 {
                     //printf("drone n: %d\n",i);
                 }
+
+                // Wait for each drone to send registration message
+
                 reply = read_1msg_blocking(c, "diameter", "cc", 10000, drone_stream);
+
+                // Blocks for up to 10 seconds waiting for message
+
+
                 assertReply(this->c, reply);
                 if (reply->type != REDIS_REPLY_NIL && reply->elements > 0)
                 {
-                    //dumpReply(reply,0);
-                    ReadStreamMsgVal(reply, 0, 0, 3, value); // reading 3rd element of the msg
-                    int drone_id = std::stoi(value);;
-                    // add drones to the array
+                    // Message format expected: type wake did {drone_id}
+                    ReadStreamMsgVal(reply, 0, 0, 3, value); // Get 3rd element (drone_id)
+                    int drone_id = std::stoi(value); // Convert to integer
+                    // Create and add new drone to control center (add drones to the array)
                     this->addDrone(Drone(drone_id)); // constructor with just the id init drone position at start
                 }
                 freeReplyObject(reply);
@@ -395,8 +402,7 @@ void ControlCenter::tick()
 
             if (this->drones.size() == DRONES_COUNT)
             {
-                //add DRONES COUNT TO CC attr, get it from command line
-                this->status = READY;
+                this->status = READY; // Move to READY state when all drones registered
             }
             break;
         }
@@ -452,29 +458,40 @@ void ControlCenter::tick()
                     // job_msg  e.g. y 80 x 50 spy 90 spx 60 sdx -1 (left)
                     // also add all of this in a job struct to be associated with the drone obj
 
-                    int did = i * SUB_AREAS_W + j;
+                    int did = i * SUB_AREAS_W + j; // ID del drone che gestirà questa subarea
+
                     const char* stream_n = int_to_string(did); //stream number associated with the drone
 
                     Job* job = create_job(i * 200, j * 200, -1, -1, -1, -1);
                     // returns a job struct using the subarea coord. use -1 for default
+                    // i * 200: coordinata Y iniziale della subarea
+                    // j * 200: coordinata X iniziale della subarea
+                    // -1, -1, -1, -1: valori default per ny, nx, dx, dy
+
+
 
                     reply = (redisReply*)redisCommand(
-                        c, "XADD %s * type %s did %d say %d sax %d ny %d nx %d dx %d dy %d"
-                        , stream_n, "task", did, job->say,
-                        job->sax, job->ny, job->nx, job->dx,
-                        job->dy); //job.msg() returns the formated job in a string-type in order to send it via stream
+                        c, "XADD %s * type %s did %d say %d sax %d ny %d nx %d dx %d dy %d",
+                        stream_n, // Stream specifico per questo drone
+                        "task", // Tipo messaggio
+                        did,
+                        job->say, // Coordinata Y subarea
+                        job->sax,
+                        job->ny, // Next Y point
+                        job->nx,
+                        job->dx, // Direzione X
+                        job->dy
+                        ); //job.msg() returns the formated job in a string-type in order to send it via stream
                     //dumpReply(reply,0);
                     assertReplyType(c, reply, REDIS_REPLY_STRING);
 
                     freeReplyObject(reply);
                     // change drone status to running
-                    this->drones[i * SUB_AREAS_H + j].job = job;
-                    this->drones[i * SUB_AREAS_H + j].status = FLYING_D;
+                    this->drones[i * SUB_AREAS_H + j].job = job; // Assegna job al drone
+                    this->drones[i * SUB_AREAS_H + j].status = FLYING_D; // Imposta stato a "in volo"
                 }
             }
-            // assegna ogni area ad un drone
 
-            //go to running
             if (DEBUG) printf("changing to running in 3sec\n");
             this->status = RUNNING;
             break;
@@ -484,7 +501,7 @@ void ControlCenter::tick()
             //running
             //read messages
 
-            // once the cc is up and running, it only recevices msgs and responds accordingly to each one
+            // once the cc is up and running, it only receives msgs and responds accordingly to each one
 
             //read all msgs in the stream at time t
             redisReply* reply;
@@ -497,15 +514,16 @@ void ControlCenter::tick()
                 //printf("drone  : %d\n", i);
                 // reply = read_1msg(this->c, "diameter", "cc", *stream_n );
                 reply = (redisReply*)redisCommand(c, "XREADGROUP GROUP %s %s COUNT 1 NOACK STREAMS %s >",
-                                                  "diameter", "cc", drone_stream);
+                                                  "diameter",
+                                                  "cc",
+                                                  drone_stream);
                 assertReply(c, reply);
 
 
-                //dumpReply(reply,0);
                 if (reply->type == REDIS_REPLY_NIL || reply->elements == 0)
                 {
                     freeReplyObject(reply);
-                    continue;
+                    continue; // Se non ci sono messaggi, passa al prossimo drone
                 }
                 ReadStreamMsgVal(reply, 0, 0, 1, msg_type); // reading 1 == msg type
 
