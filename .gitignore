@@ -7,6 +7,7 @@
 # IDE files
 .idea/
 *.iml
+*.iws
 
 # Binary files
 *.o
@@ -18,7 +19,6 @@ bin/
 *~
 *.swp
 dump.rdb
-
 /test/venv/lib/python3.9/site-packages/_distutils_hack/__init__.py
 /test/venv/lib/python3.9/site-packages/_distutils_hack/override.py
 /test/venv/lib/python3.9/site-packages/contourpy/util/__init__.py
