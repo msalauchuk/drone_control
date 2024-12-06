@@ -615,6 +615,8 @@ void ControlCenter::tick()
 
 bool is_verified(int last_v, int current_time)
 {
+    // - true se il punto è stato verificato negli ultimi 5 minuti (300 secondi)
+    // - false se il punto non è mai stato verificato o se la verifica è troppo vecchia
     return last_v != -1 && ((double)(current_time - last_v) / T) <= (300.0 / T);
 }
 
@@ -633,9 +635,12 @@ void ControlCenter::dumpsubarea(int cur)
     }
 }
 
+
+// Calcola la percentuale di area totale che è stata verificata correttamente
+
 double ControlCenter::get_percentage(int curr_time)
 {
-    int aa = 0;
+    int aa = 0; // Contatore dei punti verificati correttamente
     for (int i = 0; i < HEIGHT; i++)
     {
         for (int j = 0; j < WIDTH; j++)
@@ -648,9 +653,15 @@ double ControlCenter::get_percentage(int curr_time)
             aa++;
         }
     }
+
+    // - aa: numero di punti verificati
+    // - 300.0 * 300.0: numero totale di punti nella griglia
+    // - * 100.0: conversione in percentuale
     return ((double)aa / (300.0 * 300.0)) * 100.0;
 }
 
+
+// Verifica se l'area totale ha raggiunto la soglia minima di copertura (99%)
 bool ControlCenter::check_area(int curr_time)
 {
     int aa = 0;
@@ -661,6 +672,7 @@ bool ControlCenter::check_area(int curr_time)
             if (!is_verified(grid[i][j], curr_time))
             {
                 //dumpsubarea(curr_time);
+                continue;
             }
             aa++;
         }
@@ -688,12 +700,16 @@ void save_to_csv(double va, int t, std::string filename)
 void ControlCenter::log(int time)
 {
     // wait drone statuses for logs bloccante  (this is for the monitor so it can be blocking)
+    // Skip se non in stato RUNNING
     if (!(status == RUNNING)) return;
     redisReply* reply;
     int a = 0;
+
     //drone log e.g. did 123 battery 89 lvy 30 lvx 90 tv 340 status 0
     for (int i = 0; i < DRONES_COUNT; i++)
     {
+
+        // Legge messaggi dal log_stream
         reply = (redisReply*)redisCommand(c, "XREADGROUP GROUP %s %s COUNT 1 NOACK STREAMS %s >",
                                           "diameter", "cc", log_stream);
         //dumpReply(reply,0);
@@ -703,14 +719,13 @@ void ControlCenter::log(int time)
             continue;
         }
         a++;
-        char drone_id[8];
-        char lvy[8];
-        char lvx[8];
-        char tv[8];
-        char bat[16];
-        char stat[2];
+
+        char drone_id[8],lvy[8], lvx[8], tv[8], bat[16], stat[2];
+
         //create job using next coord. and subarea coord.
-        //TODO if drone idle continue
+
+        // Estrae informazioni dal messaggio di log
+
         ReadStreamMsgVal(reply, 0, 0, 1, drone_id);
         ReadStreamMsgVal(reply, 0, 0, 3, bat);
         ReadStreamMsgVal(reply, 0, 0, 5, lvy);
@@ -718,6 +733,7 @@ void ControlCenter::log(int time)
         ReadStreamMsgVal(reply, 0, 0, 9, tv);
         ReadStreamMsgVal(reply, 0, 0, 11, stat);
 
+        // MONITOR: Verifica delle condizioni critiche
         int did = std::stoi(drone_id);
         if (std::stoi(stat) == 1)
         {
@@ -731,10 +747,11 @@ void ControlCenter::log(int time)
         ilvy = ilvy / 20;
         drones[did].battery = std::stod(bat);
 
-        // MONITOR BATTERIA
+        // MONITOR BATTERIA: Verifica che la batteria non scenda sotto il minimo
         assert(drones[did].battery > MIN_BATTERY);
-        int ltv = std::stoi(tv);
 
+        // Aggiorna la griglia con le ultime verifiche
+        int ltv = std::stoi(tv);
         if (grid[ilvy][ilvx] < ltv)
         {
             //printf("changing griddd  y : %d x : %d\n",ilvy,ilvx);
@@ -748,6 +765,7 @@ void ControlCenter::log(int time)
         // optimize
     }
     //printf("%d drones\n",a);
+    // MONITOR AREA: Verifica che l'area verificata non diminuisca
     bool area_verified1 = area_verified; //verfica allo stato precedente
     area_verified = check_area(time);
     save_to_csv(get_percentage(time), time,TEST_PATH);
@@ -755,7 +773,7 @@ void ControlCenter::log(int time)
     //MONITOR AREA
     assert(area_verified1 ? area_verified: 1); // se l' area diventa verificata non deve mai smettere
 
-    // MONITOR TIME
+    // MONITOR TIME: Verifica il tempo massimo per la verifica completa
     if (!area_verified1 && area_verified)
     {
         assert(MAX_VERIFY_TIME >= time*T);
