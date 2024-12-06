@@ -23,7 +23,6 @@ const char* int_to_string(int x)
     return std::to_string(x).c_str();
 }
 
-//TODO add it to the lib
 redisReply* read_stream(redisContext* c, const char* stream_name)
 {
     // Read from the stream starting from the beginning
@@ -52,7 +51,7 @@ void ControlCenter::init_grid()
 void ControlCenter::init()
 {
     /* FASE 1: INIZIALIZZAZIONE VARIABILI BASE */
-    this->pid = getpid();
+    this-> pid = getpid();
     init_grid();
     // Configurazione connessione Redis
     const char* hostname = "127.0.0.1"; // localhost
@@ -204,12 +203,27 @@ void get_job_msg(Job* my_job, char* buffer)
 Job* create_job(int say, int sax, int ny, int nx, int dx, int dy)
 {
     Job* new_job = (Job*)malloc(sizeof(Job));
-    //TODO could be necessary to add dy
+
+
+    // The initial coordinates
     new_job->sax = sax;
     new_job->say = say;
+
+
+    // Se ny o nx sono -1, calcola automaticamente il percorso del drone
     if (ny < 0 || nx < 0)
     {
+
+        // Dimensione del lato della subarea (200m = 20m * 10 punti)
         int subareaside = 20 * 10;
+
+        // Calcola direzione e punto successivo in base alla posizione della subarea
+        // L'area totale è 6000x6000m (300x300 punti a 20m di distanza)
+        // Divisa in 4 quadranti con centro in (3000,3000)
+
+
+
+        // Q1: BASSO DESTRA
         if (sax > 3000 && say > 3000)
         {
             new_job->ny = say + 10;
@@ -217,6 +231,8 @@ Job* create_job(int say, int sax, int ny, int nx, int dx, int dy)
             new_job->dx = 1;
             new_job->dy = 1;
         }
+
+        // Q2: BASSO SINISTRA
         else if (sax < 3000 && say > 3000)
         {
             new_job->ny = say + 10;
@@ -224,24 +240,28 @@ Job* create_job(int say, int sax, int ny, int nx, int dx, int dy)
             new_job->dx = -1;
             new_job->dy = 1;
         }
+
+        // Q3: ALTO SINISTRA
         else if (sax < 3000 && say < 3000)
         {
-            new_job->ny = say + subareaside - 10; //size of subarea
+            new_job->ny = say + subareaside - 10;
             new_job->nx = sax + subareaside - 10;
             new_job->dx = -1;
 
             new_job->dy = -1;
         }
         else
+            // Q4: ALTO DESTRA
+
         {
-            new_job->ny = say + subareaside - 10; //size of subarea
+            new_job->ny = say + subareaside - 10;
             new_job->nx = sax + 10;
             new_job->dx = 1;
             new_job->dy = -1;
         }
         return new_job;
     }
-
+    // Se sono specificate le coordinate successive, usa quelle
     new_job->dx = dx;
     new_job->dy = dy;
     new_job->ny = ny;
@@ -264,8 +284,32 @@ void ControlCenter::send_substitute(int new_drone_id)
     this->drones[new_drone_id].status = FLYING_D;
 }
 
+/**
+ * Gestisce i messaggi ricevuti dai droni relativi allo stato della batteria
+ * @param type Tipo di messaggio ricevuto ("low_battery", "charging", "recharged")
+ * @param reply Risposta Redis contenente i dettagli del messaggio
+ */
+
 void ControlCenter::handle_msg(const char* type, redisReply* reply)
 {
+
+    // enum BatteryMsgType {
+    //     LOW_BATTERY = 0,
+    //     CHARGING = 1,
+    //     RECHARGED = 2
+    // };
+    //
+    // BatteryMsgType msg_type;
+    // if (strcmp(type, "low_battery") == 0) {
+    //     msg_type = LOW_BATTERY;
+    // } else if (strcmp(type, "charging") == 0) {
+    //     msg_type = CHARGING;
+    // } else {
+    //     msg_type = RECHARGED;
+    // }
+
+
+
     int msg_type;
     if (strcmp(type, "low_battery") == 0)
     {
@@ -284,6 +328,8 @@ void ControlCenter::handle_msg(const char* type, redisReply* reply)
     {
     case 0:
         {
+            // Gestisce la situazione di batteria scarica e assegna il task a un nuovo drone
+            // Formato messaggio: type low_battery did 123 cy 0 cx 0 nexty 40 nextx 65 dirx -1 diry 1
             //low_battery msgtype e.g. type low_battery did 123 cy 0 cx 0 nexty 40 nextx 65 dirx -1
             char say[8];
             char sax[8];
@@ -292,41 +338,50 @@ void ControlCenter::handle_msg(const char* type, redisReply* reply)
             char dx[8];
             char dy[8];
             char did[8];
+
+            // Estrae i valori dal messaggio Redis
             //create job using next coord. and subarea coord.
-            ReadStreamMsgVal(reply, 0, 0, 3, did);
-            ReadStreamMsgVal(reply, 0, 0, 5, say);
+            ReadStreamMsgVal(reply, 0, 0, 3, did); // ID del drone con batteria scarica
+            ReadStreamMsgVal(reply, 0, 0, 5, say); // Coordinate correnti e successive
             ReadStreamMsgVal(reply, 0, 0, 7, sax);
             ReadStreamMsgVal(reply, 0, 0, 9, ny);
             ReadStreamMsgVal(reply, 0, 0, 11, nx);
             ReadStreamMsgVal(reply, 0, 0, 13, dx);
             ReadStreamMsgVal(reply, 0, 0, 15, dy);
+
+
+            // Crea un nuovo job con le coordinate attuali e successive
             Job* job = create_job(std::stoi(say), std::stoi(sax), std::stoi(ny), std::stoi(nx), std::stoi(dx),
                                   std::stoi(dy));
 
+            // Cerca un drone disponibile per il task
             int new_drone_id = get_available_drone_id(); // returns the first free drone
             if (new_drone_id == -1)
             {
+                // Se non ci sono droni disponibili, mette il job in coda
                 job_queue.push_back(job);
+
+                // Libera il job del drone con batteria scarica e lo manda a ricaricare
                 free(this->drones[std::stoi(did)].job);
                 this->drones[std::stoi(did)].status = HOMING_D;
                 return;
             }
 
+            // Invia il task al nuovo drone tramite il suo stream dedicato
             //printf(">>>>>>>>>sending %d drone\n",new_drone_id);
             redisReply* rep;
-            //TODOTODOTODO IMPORTANT
             rep = (redisReply*)redisCommand(c, "XADD %d * type %s did %d say %d sax %d ny %d nx %d dx %d dy %d"
                                             , new_drone_id, "task", new_drone_id, job->say,
                                             job->sax, job->ny, job->nx, job->dx,
                                             job->dy);
-            //job.msg() returns the formated job in a string-type in order to send it via stream
             assertReplyType(c, rep, REDIS_REPLY_STRING);
-            //dumpReply(rep,0);
 
-            //chagne new drone status
+            // Aggiorna lo stato dei droni
+            // Assegna il job al nuovo drone e lo mette in volo
             this->drones[new_drone_id].job = job;
             this->drones[new_drone_id].status = FLYING_D;
-            //change homing drone status
+
+            // Libera il job del drone scarico e lo manda a ricaricare
             free(this->drones[std::stoi(did)].job);
             this->drones[std::stoi(did)].status = HOMING_D;
             // change lowe_battery_id status to homing
@@ -334,7 +389,8 @@ void ControlCenter::handle_msg(const char* type, redisReply* reply)
         }
     case 1:
         {
-            //charging msgtype e.g. type charging did 123
+            // Gestisce l'inizio della ricarica di un drone
+            // Formato messaggio: type charging did 123
             char did[4];
             ReadStreamMsgVal(reply, 0, 0, 3, did);
             this->drones[atoi(did)].status = CHARGING_D;
@@ -344,10 +400,12 @@ void ControlCenter::handle_msg(const char* type, redisReply* reply)
         break;
     case 2:
         {
+
+            // Gestisce il completamento della ricarica di un drone
+            // Formato messaggio: type recharged did 123
             char did[4];
             ReadStreamMsgVal(reply, 0, 0, 3, did);
             this->drones[atoi(did)].status = IDLE_D;
-            //recharged msgtype e.g. type recharged did 123
             // change id status to IDLE
             break;
         }
@@ -470,6 +528,7 @@ void ControlCenter::tick()
 
 
 
+                    // invio job al drone
                     reply = (redisReply*)redisCommand(
                         c, "XADD %s * type %s did %d say %d sax %d ny %d nx %d dx %d dy %d",
                         stream_n, // Stream specifico per questo drone
@@ -513,6 +572,10 @@ void ControlCenter::tick()
                 //const char * stream_n = int_to_string(i);
                 //printf("drone  : %d\n", i);
                 // reply = read_1msg(this->c, "diameter", "cc", *stream_n );
+
+
+                // monitora continuamente i messaggi dai droni
+
                 reply = (redisReply*)redisCommand(c, "XREADGROUP GROUP %s %s COUNT 1 NOACK STREAMS %s >",
                                                   "diameter",
                                                   "cc",
@@ -527,7 +590,8 @@ void ControlCenter::tick()
                 }
                 ReadStreamMsgVal(reply, 0, 0, 1, msg_type); // reading 1 == msg type
 
-                handle_msg(msg_type, reply); // function that handles msgs according to msg type
+                // handle low_battery/charging/recharged
+                handle_msg(msg_type, reply);
                 freeReplyObject(reply);
             }
 
