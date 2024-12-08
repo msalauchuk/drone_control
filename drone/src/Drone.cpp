@@ -48,6 +48,8 @@ void Swarm::await_sync()
     //read syncstream2
     reply = read_1msg_blocking(c, "diameter", "drone", block_time, sync_stream);
     //dumpReply(reply,0);
+    // Free the reply from read_1msg_blocking
+    freeReplyObject(reply);
 
     // if needed, dump reply or read it, but shouldnt be necessary atm
     //TODO check wheter the reply contains the sync msg
