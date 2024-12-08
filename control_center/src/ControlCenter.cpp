@@ -280,7 +280,7 @@ void ControlCenter::send_substitute(int new_drone_id)
                                     job->sax, job->ny, job->nx, job->dx, job->dy);
     job_queue.pop_back();
     freeReplyObject(rep);
-    this->drones[new_drone_id].job = job;
+    this->drones[new_drone_id].job = job;  // Assign job to new drone
     this->drones[new_drone_id].status = FLYING_D;
 }
 
