@@ -5,15 +5,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// include hiredis
-
 #include <hiredis/hiredis.h>
 
 
-// #include "global.h"
-// #include "../../con2db/pgsql.h"
-
-
+// macros
 #define dbg_log(fmt, ... )			\
     do { \
         fprintf(stderr, "%s:%d : " fmt "\n", __FILE__, __LINE__,__VA_ARGS__); \
