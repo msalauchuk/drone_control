@@ -21,7 +21,6 @@ typedef struct {
     int nx;  //
     int dx;  // direction x
     int dy; //usually 0 but changes when doing lawn mowner
-    //TODO add dy in everything
 } Job;
 double get_random_charge_time();
 void reset_job(Job * job);
@@ -29,19 +28,18 @@ Job * get_job_from_reply(redisReply * reply);
 
 
 enum flying_status {
-    FLYING_F, // Direct flight to target
-    LAWN_MOWNER_F, // Systematic coverage
+    DIRECT_FLIGHT, //  to target (center of grid point)
+    COVERAGE_PATTERN, // lawn mowner pattern
     WAIT_NEXT_DRONE_F,
-    HOMING_F,
-    RESTARTING
+    RETURN_TO_BASE,
+    PATTERN_RESET
 };
 
 
 // Each drone goes through these states:
 enum drone_status{
     STARTUP, // Receives job from Redis with subarea assignment
-
-    IDLE, // Ready for new job
+    READY, // Ready for new job
     FLYING, //arrive at start pos
     WAIT_NEXT_DRONE, // flying to the last pos while other drone arrives
     HOMING, // Return to CC
@@ -60,7 +58,7 @@ public:
     int last_v_x ;
     int last_v_y;
     int last_t_v;
-    double last_dist; // only when waiting other drone
+    double distanceToCC; // only when waiting other drone
     double x;
     double y;
     flying_status f_status;

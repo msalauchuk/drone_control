@@ -10,7 +10,7 @@ Drone::Drone(int did)
     battery = 100,
         x = CC_X;
     y = CC_Y;
-    f_status = FLYING_F;
+    f_status = DIRECT_FLIGHT;
     speed = (30.0 / 3.6) * T;
     status = STARTUP;
     last_v_x = 0;
@@ -164,7 +164,7 @@ bool Drone::is_home()
 
 bool Drone::is_done()
 {
-    return last_dist <= 0;
+    return distanceToCC <= 0;
 }
 
 // Calculate remaining flight range based on battery percentage
@@ -182,7 +182,7 @@ bool Drone::is_low_battery()
 
 void Drone::set_last_dist()
 {
-    last_dist = get_distance_control_center();
+    distanceToCC = get_distance_control_center();
 }
 
 void Drone::send_replace_drone_msg(redisContext* c)
@@ -191,7 +191,7 @@ void Drone::send_replace_drone_msg(redisContext* c)
     //subarea is 200m × 200m
     // msg e.g. type low_battery did 123 cy 20 cx 20 ny 40 nx 40 dx -1 dy -1
     double d_last; // distance the drone still needs to cover to complete its current pattern.
-    if (!(f_status == RESTARTING))
+    if (!(f_status == PATTERN_RESET))
     {
         if (job->dy) // If moving downward in the grid (dy = 1)
         {
@@ -232,9 +232,9 @@ void Drone::send_replace_drone_msg(redisContext* c)
 
 
     // Calculate how far drone can go before needing to return
-    // last_dist: distance to Control Center
+    // distanceToCC: distance to Control Center
     // d_last: distance needed to complete pattern
-    int temp = last_dist - d_last;
+    int temp = distanceToCC - d_last;
 
 
     // Convertire questa distanza in coordinate griglia
@@ -289,7 +289,7 @@ void Drone::send_replace_drone_msg(redisContext* c)
 
     assertReplyType(c, reply, REDIS_REPLY_STRING);
     freeReplyObject(reply);
-    //last_dist += 400;
+    //distanceToCC += 400;
 }
 
 
@@ -365,12 +365,12 @@ void Drone::move(int t)
     // Update distance remaining if waiting for replacement
     if (status == WAIT_NEXT_DRONE)
     {
-        last_dist -= speed;
+        distanceToCC -= speed;
     }
     switch (this->f_status)
     {
-    case RESTARTING:
-    case FLYING_F:
+    case PATTERN_RESET:
+    case DIRECT_FLIGHT:
         {
             // Direct flight to target coordinates
             this->calc_velocity(job->nx, job->ny);
@@ -381,14 +381,14 @@ void Drone::move(int t)
             // Check if reached target
             if (x == job->nx && y == job->ny)
             {
-                f_status = LAWN_MOWNER_F; // Switch to coverage pattern
+                f_status = COVERAGE_PATTERN; // Switch to coverage pattern
                 last_v_x = x;
                 last_v_y = y;
                 last_t_v = t; // mark position verified at time t
             }
             break;
         }
-    case HOMING_F:
+    case RETURN_TO_BASE:
         {
             this->calc_velocity(CC_X,CC_Y);
             x += velx;
@@ -396,7 +396,7 @@ void Drone::move(int t)
             break;
         }
     case WAIT_NEXT_DRONE_F:
-    case LAWN_MOWNER_F:
+    case COVERAGE_PATTERN:
 
         // Implement lawn mower pattern for area coverage
         // Calculate appropriate speed based on direction and remaining distance
@@ -431,14 +431,14 @@ void Drone::move(int t)
             job->ny += job->dy * 20;
             job->nx = x;
             job->dx = -job->dx;
-            f_status = FLYING_F;
+            f_status = DIRECT_FLIGHT;
 
             // Check if subarea is complete
             if (job->ny < job->say || job->ny > job->say + 200)
             {
                 reset_job(this->job);
                 if (status != WAIT_NEXT_DRONE)
-                    f_status = RESTARTING;
+                    f_status = PATTERN_RESET;
             }
         }
 
@@ -463,11 +463,11 @@ void Drone::tick(redisContext* c, int t)
             assertReplyType(c, reply, REDIS_REPLY_STRING);
             freeReplyObject(reply);
 
-            // Transition to IDLE state after successful registration
-            status = IDLE;
+            // Transition to READY state after successful registration
+            status = READY;
             break;
         }
-    case IDLE:
+    case READY:
         {
 
             // Waiting state - drone checks for assigned tasks
@@ -492,7 +492,7 @@ void Drone::tick(redisContext* c, int t)
             //printf("************job nx: %d, ny : %d, sax : %d, say : %d\n", job->nx, job->ny, job->sax, job->say);
 
             status = FLYING;
-            f_status = FLYING_F;
+            f_status = DIRECT_FLIGHT;
             freeReplyObject(reply);
 
             break;
@@ -540,7 +540,7 @@ void Drone::tick(redisContext* c, int t)
                 this->job->nx = CC_X; // Set destination to control center
                 this->job->ny = CC_Y;
                 status = HOMING;
-                this->f_status = HOMING_F;
+                this->f_status = RETURN_TO_BASE;
             }
             this->move(t); // Continue movement while waiting
             // vai alla pos lastx lasty
@@ -570,7 +570,7 @@ void Drone::tick(redisContext* c, int t)
             if (this->is_charged())
             {
                 // When fully charged, return to idle state
-                status = IDLE;
+                status = READY;
                 this->battery = 100.0;
                 //printf("drone %d FULLY CHARGED\n",id);
 
@@ -593,7 +593,7 @@ void Swarm::tick(int t)
     // At each time step, update the state of all drones in the swarm
     for (int i = 0; i < DRONES_COUNT; i++)
     {
-        //    printf("+++++++++++++\ndrone : %d, x: %f , y %f, status : %d, f_status : %d, battery : %f, last_dist : %f\n",drones[i].id, drones[i].x, drones[i].y, drones[i].status, drones[i].f_status, drones[i].battery,drones[i].last_dist);
+        //    printf("+++++++++++++\ndrone : %d, x: %f , y %f, status : %d, f_status : %d, battery : %f, distanceToCC : %f\n",drones[i].id, drones[i].x, drones[i].y, drones[i].status, drones[i].f_status, drones[i].battery,drones[i].distanceToCC);
         //   printf(">>>>> say %d, sax %d, dx %d, dy %d\nny : %d, nx %d\n",drones[i].job->say,drones[i].job->sax,drones[i].job->dx,drones[i].job->dy,drones[i].job->ny,drones[i].job->nx);
         //printf("y : %lf, x : %lf\n",drones[i].y, drones[i].x);
 
@@ -607,7 +607,7 @@ void Swarm::log()
     redisReply* reply;
     for (int i = 0; i < DRONES_COUNT; i++)
     {
-        if (drones[i].status == IDLE)
+        if (drones[i].status == READY)
         {
             continue;
         }
