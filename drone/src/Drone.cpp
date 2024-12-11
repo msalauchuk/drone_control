@@ -55,6 +55,9 @@ void Swarm::await_sync()
     freeReplyObject(reply);
 }
 
+
+// Initialize 1000 drones
+// Each drone starts at CC (3000,3000) with 100% battery
 void Swarm::init()
 {
     //set up redis context
@@ -184,24 +187,29 @@ void Drone::set_last_dist()
 
 void Drone::send_replace_drone_msg(redisContext* c)
 {
+
+    //subarea is 200m × 200m
     // msg e.g. type low_battery did 123 cy 20 cx 20 ny 40 nx 40 dx -1 dy -1
-    double d_last;
+    double d_last; // distance the drone still needs to cover to complete its current pattern.
     if (!(f_status == RESTARTING))
     {
-        if (job->dy)
+        if (job->dy) // If moving downward in the grid (dy = 1)
         {
-            //we are on the down side of the grid
-            d_last = (job->say + 190 - y) / 20 * 180;
+            // gives number of remaining rows Multiplying by 180 gives total distance including all horizontal movements in those rows
+            //the center is chosen as the drone’s position to ensure consistent movement. A cell’s center is offset by 10 meters from the edges
+            d_last = (job->say + 190 - y) / 20 * 180; // 20m × 9 = 180m horizontally (9 horizontal movements of 20m each)
             d_last -= (job->ny - y);
         }
         else
+            // Moving upward (dy = -1)
         {
             d_last = (y - job->say + 10) / 20 * 180;
             d_last -= (y - job->ny);
         }
     }
-    else
+    else // When restarting pattern in subarea
     {
+        // Only consider direct distance to next target
         if (job->dy)
         {
             d_last = (job->ny - y);
@@ -211,48 +219,62 @@ void Drone::send_replace_drone_msg(redisContext* c)
             d_last = (y - job->ny);
         }
     }
+
+    // Add remaining horizontal distance in current row
     if (job->dx)
     {
-        //bottom right
-        d_last += (job->sax + 190 - x);
+        d_last += (job->sax + 190 - x); // 190 = 200m - 10m offset
     }
     else
     {
-        d_last += (x - job->sax + 10);
+        d_last += (x - job->sax + 10); // +10 for center of first cell
     }
+
+
+    // Calculate how far drone can go before needing to return
+    // last_dist: distance to Control Center
+    // d_last: distance needed to complete pattern
     int temp = last_dist - d_last;
 
-    int move_y = (temp / 11) % 11;
+
+    // Convertire questa distanza in coordinate griglia
+    // Using 11 instead of 10 provides a buffer row that triggers reset
+    int move_y = (temp / 11) % 11; // Determina la riga nella griglia
     int nexty;
-    if (job->dy)
+
+    if (job->dy) //down
     {
-        if (move_y > 9)
+        if (move_y > 9) // Beyond grid bounds, reset to top
         {
-            nexty = job->say + 10;
+            nexty = job->say + 10; // Start at first row
         }
         else
         {
+            // Calculate position: start + (grid_position * cell_size) + center_offset
             nexty = (int)job->say + move_y * 20 + 10;
         }
     }
-    else
+    else // Moving up
     {
-        if (move_y > 9)
+        if (move_y > 9) // Beyond grid bounds, reset to bottom
         {
-            nexty = job->say + 190;
+            nexty = job->say + 190; // Start at last row
         }
         else
         {
+            // Calculate from bottom: start + subarea_height - (grid_position * cell_size)
+
             nexty = (int)job->say + 190 - move_y * 20;
         }
     }
 
-    int move_x = (temp % 10);
+    int move_x = (temp % 10); // Determina la colonna nella griglia
 
+    //Determinare direzione X basata sulla riga
     int ndx = ((nexty / 20) % 2) ? 1 : -1;
     ndx = job->sax < 3000 ? ndx : -ndx;
 
-    int nextx;
+    int nextx; // X effettiva basata sulla direzione
     if (!ndx)
     {
         nextx = job->sax + move_x * 20 + 10;
@@ -589,7 +611,7 @@ void Swarm::log()
         {
             continue;
         }
-        reply = (redisReply*)RedisCommand(c, "XADD %s * did %d battery %f lvy %d lvx %d tv %d status %d"
+        reply = RedisCommand(c, "XADD %s * did %d battery %f lvy %d lvx %d tv %d status %d"
                                           , log_stream, i, drones[i].battery, drones[i].last_v_y, drones[i].last_v_x
                                           , drones[i].last_t_v, drones[i].status);
         assertReply(c, reply);

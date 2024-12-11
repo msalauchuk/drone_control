@@ -17,7 +17,7 @@
 typedef struct {
     int sax; //subarea x 
     int say; //subarea y
-    int ny;  // next point of the subarea to start
+    int ny;  // // First target x (center of first cell)
     int nx;  //
     int dx;  // direction x
     int dy; //usually 0 but changes when doing lawn mowner
@@ -26,19 +26,25 @@ typedef struct {
 double get_random_charge_time();
 void reset_job(Job * job);
 Job * get_job_from_reply(redisReply * reply);
+
+
 enum flying_status {
-    FLYING_F,
-    LAWN_MOWNER_F,
+    FLYING_F, // Direct flight to target
+    LAWN_MOWNER_F, // Systematic coverage
     WAIT_NEXT_DRONE_F,
     HOMING_F,
     RESTARTING
 };
+
+
+// Each drone goes through these states:
 enum drone_status{
-    STARTUP,
-    IDLE,
-    FLYING,//arrive at start pos
+    STARTUP, // Receives job from Redis with subarea assignment
+
+    IDLE, // Ready for new job
+    FLYING, //arrive at start pos
     WAIT_NEXT_DRONE, // flying to the last pos while other drone arrives
-    HOMING, //going home
+    HOMING, // Return to CC
     CHARGING
 };
 class Drone {
@@ -46,7 +52,7 @@ private:
     // Attributi privati della classe Drone
     double velx;
     double vely;
-    double speed; //gets calculated based on how long is time t
+    double speed; //// 30 km/h to m/s * 2.4s = 20m per tick
     double charge_time;
     // the drone can never be at distance autonomy left 'd' away from its distance from the center 'c'.  if d>=c then the drone needs to go back to charge
 
@@ -58,7 +64,7 @@ public:
     double x;
     double y;
     flying_status f_status;
-    double battery;// Livello della batteria
+    double battery;// 1800s = 30 minutes total flight time (100.0 / (1800.0 / T)
     drone_status status;
     int id; // Identificativo unico del drone
     Job * job;
