@@ -10,7 +10,7 @@ Drone::Drone(int did)
     battery = 100,
         x = CC_X;
     y = CC_Y;
-    f_status = DIRECT_FLIGHT;
+    f_status = MOVING_TO_TARGET;
     speed = (30.0 / 3.6) * T;
     status = STARTUP;
     last_v_x = 0;
@@ -162,7 +162,7 @@ bool Drone::is_home()
     return x == CC_X && y == CC_Y;
 }
 
-bool Drone::is_done()
+bool Drone::at_range_limit()
 {
     return distanceToCC <= 0;
 }
@@ -294,63 +294,72 @@ void Drone::send_replace_drone_msg(redisContext* c)
 
 
 // Calculate normalized velocity vector towards destination
-void Drone::calc_velocity(double destx, double desty)
+void Drone::calc_velocity(double targetX, double targetY)
 {
-    // Normalize the direction vector
-    double diffX = destx - x;
-    double diffY = desty - y;
+    // distance to target x,y
+    double distanceToTargetX = targetX - x;
+    double distanceToTargetY = targetY - y;
 
 
-    // Calculate vector length
+    // Calculate vector length using Pythagoras
     // Normalize the differences to obtain unit vectors
-    double length = sqrt(diffX * diffX + diffY * diffY);
+    double totalDistanceToTarget = sqrt(distanceToTargetX * distanceToTargetX + distanceToTargetY * distanceToTargetY);
 
 
+    //Determine movement speed for this tick
     // Use smaller of maximum speed or distance to target
-    double max_speed = (speed >= length) ? length : speed;
+    // speed = 20m per tick (from constructor: speed = (30.0 / 3.6) * T)
 
-    if (length <= 0)
+    // If target is closer than 20m, move exactly that distance
+    // Otherwise move maximum 20m
+    double movementSpeed = (speed >= totalDistanceToTarget) ? totalDistanceToTarget : speed;
+
+    if (totalDistanceToTarget <= 0)
     {
+        // Already at target
         velx = 0;
         vely = 0;
         return;
     }
     // Normalize direction vector and scale by speed
-    double unitX = diffX / length;
-    double unitY = diffY / length;
-    velx = max_speed * unitX;
-    vely = max_speed * unitY;
+    double directionX = distanceToTargetX / totalDistanceToTarget;
+    double directionY = distanceToTargetY / totalDistanceToTarget;
+
+    velx = movementSpeed * directionX;
+    vely = movementSpeed * directionY;
 }
 
 void reset_job(Job* job)
 {
-    int subareaside = 20 * 10;
+    int subarea_side = GRID_SIZE * 10;
+    int offset = 10;
+
     if (job->sax > 3000 && job->say > 3000)
     {
-        job->ny = job->say + 10;
-        job->nx = job->sax + 10;
+        job->ny = job->say + offset;
+        job->nx = job->sax + offset;
         job->dx = 1;
         job->dy = 1;
     }
     else if (job->sax < 3000 && job->say > 3000)
     {
-        job->ny = job->say + 10;
-        job->nx = job->sax + subareaside - 10;
+        job->ny = job->say + offset;
+        job->nx = job->sax + subarea_side - offset;
         job->dx = -1;
         job->dy = 1;
     }
     else if (job->sax < 3000 && job->say < 3000)
     {
-        job->ny = job->say + subareaside - 10; //size of subarea
-        job->nx = job->sax + subareaside - 10;
+        job->ny = job->say + subarea_side - offset; //size of subarea
+        job->nx = job->sax + subarea_side - offset;
         job->dx = -1;
 
         job->dy = -1;
     }
     else
     {
-        job->ny = job->say + subareaside - 10; //size of subarea
-        job->nx = job->sax + 10;
+        job->ny = job->say + subarea_side - offset; //size of subarea
+        job->nx = job->sax + offset;
         job->dx = 1;
         job->dy = -1;
     }
@@ -363,14 +372,14 @@ void Drone::move(int t)
     this->battery -= (100.0 / (1800.0 / T));
 
     // Update distance remaining if waiting for replacement
-    if (status == WAIT_NEXT_DRONE)
+    if (status == HANDOVER_MODE)
     {
-        distanceToCC -= speed;
+        distanceToCC -= speed; // Counts down the remaining distance it can cover
     }
     switch (this->f_status)
     {
     case PATTERN_RESET:
-    case DIRECT_FLIGHT:
+    case MOVING_TO_TARGET:
         {
             // Direct flight to target coordinates
             this->calc_velocity(job->nx, job->ny);
@@ -395,31 +404,34 @@ void Drone::move(int t)
             y += vely;
             break;
         }
-    case WAIT_NEXT_DRONE_F:
+    case HANDOVER_SCAN:
     case COVERAGE_PATTERN:
 
-        // Implement lawn mower pattern for area coverage
-        // Calculate appropriate speed based on direction and remaining distance
-        double m_speed;
-        if (job->dx == -1)
+        // Calculate step for one tick in lawn-mower pattern
+        double move_distance;
+        if (job->dx == -1) // left
         {
-            // Moving left
-            m_speed = (speed >= x - (job->sax + 10)) ? (x - (job->sax + 10)) : speed;
-            this->x += m_speed * job->dx;
-            if (x <= last_v_x - 20)
+            // Calculate distance to left edge or use standard tick distance
+            double distanceToLeftEdge = x - (job->sax + 10);
+            move_distance = (speed >= distanceToLeftEdge) ? distanceToLeftEdge : speed;
+
+            this->x += move_distance * job->dx;
+
+            // Verify grid point passage
+            if (x <= last_v_x - GRID_SIZE)
             {
-                last_v_x = last_v_x - 20;
+                last_v_x = last_v_x - GRID_SIZE;
                 last_t_v = t; // position verified at time t
             }
         }
         else
         {
-            // Moving right
-            m_speed = (speed >= (job->sax + 190) - x) ? ((job->sax + 190) - x) : speed;
-            this->x += m_speed * job->dx;
-            if (x >= last_v_x + 20)
+            // Moving right // 190 -> SUBAREA_SIZE - GRID_OFFSET
+            move_distance = (speed >= (job->sax + 190) - x) ? ((job->sax + 190) - x) : speed;
+            this->x += move_distance * job->dx;
+            if (x >= last_v_x + GRID_SIZE)
             {
-                last_v_x = last_v_x + 20;
+                last_v_x = last_v_x + GRID_SIZE;
                 last_t_v = t; // position verified at time t
             }
         }
@@ -427,17 +439,18 @@ void Drone::move(int t)
         // Check if reached edge of subarea
         if (x == job->sax + 10 || x == job->sax + 190)
         {
-            // Move to next row and reverse direction
-            job->ny += job->dy * 20;
+            // Move down one row and reverse direction
+            job->ny += job->dy * GRID_SIZE;
             job->nx = x;
-            job->dx = -job->dx;
-            f_status = DIRECT_FLIGHT;
+            job->dx = -job->dx; //reverse direction
+            f_status = MOVING_TO_TARGET;
 
-            // Check if subarea is complete
+            // Check if subarea is complete, moved beyond subarea boundaries
             if (job->ny < job->say || job->ny > job->say + 200)
             {
                 reset_job(this->job);
-                if (status != WAIT_NEXT_DRONE)
+
+                if (status != HANDOVER_MODE)
                     f_status = PATTERN_RESET;
             }
         }
@@ -491,13 +504,13 @@ void Drone::tick(redisContext* c, int t)
 
             //printf("************job nx: %d, ny : %d, sax : %d, say : %d\n", job->nx, job->ny, job->sax, job->say);
 
-            status = FLYING;
-            f_status = DIRECT_FLIGHT;
+            status = ON_MISSION;
+            f_status = MOVING_TO_TARGET;
             freeReplyObject(reply);
 
             break;
         }
-    case FLYING:
+    case ON_MISSION:
         {
 
             // Active task execution state
@@ -517,24 +530,23 @@ void Drone::tick(redisContext* c, int t)
                 this->send_replace_drone_msg(c); // Request replacement
 
                 // Transition to waiting state
-                status = WAIT_NEXT_DRONE;
-                this->f_status = WAIT_NEXT_DRONE_F;
+                status = HANDOVER_MODE;
+                this->f_status = HANDOVER_SCAN;
                 break;
             }
             // Continue normal movement pattern
             this->move(t);
 
-
             break;
         }
-    case WAIT_NEXT_DRONE:
+    case HANDOVER_MODE:
         {
 
-            // Waiting for replacement drone while continuing limited movement
+            // Waiting for replacement drone while continuing until safe battery range
 
 
 
-            if (this->is_done())
+            if (this->at_range_limit())
             {
                 // If finished current segment, prepare to return home
                 this->job->nx = CC_X; // Set destination to control center

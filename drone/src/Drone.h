@@ -28,9 +28,9 @@ Job * get_job_from_reply(redisReply * reply);
 
 
 enum flying_status {
-    DIRECT_FLIGHT, //  to target (center of grid point)
+    MOVING_TO_TARGET, //  to target (center of grid point)
     COVERAGE_PATTERN, // lawn mowner pattern
-    WAIT_NEXT_DRONE_F,
+    HANDOVER_SCAN,
     RETURN_TO_BASE,
     PATTERN_RESET
 };
@@ -40,8 +40,8 @@ enum flying_status {
 enum drone_status{
     STARTUP, // Receives job from Redis with subarea assignment
     READY, // Ready for new job
-    FLYING, //arrive at start pos
-    WAIT_NEXT_DRONE, // flying to the last pos while other drone arrives
+    ON_MISSION, //arrive at start pos
+    HANDOVER_MODE, // flying to the last pos while other drone arrives
     HOMING, // Return to CC
     CHARGING
 };
@@ -73,12 +73,12 @@ public:
     bool is_charged();
     void charge();
     bool is_home();
-    bool is_done();
+    bool at_range_limit();
     double get_autonomy();
     bool is_low_battery();
     void set_last_dist();
     void send_replace_drone_msg(redisContext * c);
-    void calc_velocity(double destx, double desty);
+    void calc_velocity(double targetX, double targetY);
     void move(int t);
 };
 class Swarm {

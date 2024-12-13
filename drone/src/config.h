@@ -16,6 +16,8 @@
 // Height of the total area in subareas (30 subareas * 200m = 6000m height)
 #define SUB_AREAS_H 30
 
+#define GRID_SIZE 20
+
 // Time step(tick) in seconds (chosen to make drones move 20m per tick at 30km/h)
 // Also synchronizes with 30-minute battery life (750 ticks * 2.4s = 1800s = 30min)
 #define T 2.4
