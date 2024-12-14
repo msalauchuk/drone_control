@@ -698,12 +698,25 @@ void save_to_csv(double va, int t, std::string filename)
 }
 
 void ControlCenter::log(int time)
+
 {
+
+    printf("\n=== Starting log function at time %d ===\n", time);
+
     // wait drone statuses for logs bloccante  (this is for the monitor so it can be blocking)
     // Skip se non in stato RUNNING
-    if (!(status == RUNNING)) return;
+    if (!(status == RUNNING))
+    {
+        printf("Skipping log - not in RUNNING state\n");
+        return;
+    }
+    printf("Starting log cycle for time %d\n", time);
+
+
     redisReply* reply;
     int a = 0;
+    static int last_log_count = 0;
+
 
     //drone log e.g. did 123 battery 89 lvy 30 lvx 90 tv 340 status 0
     for (int i = 0; i < DRONES_COUNT; i++)
@@ -718,6 +731,8 @@ void ControlCenter::log(int time)
             freeReplyObject(reply);
             continue;
         }
+        // If we got here, we received a log message
+        printf("Received log from drone at time %d\n", time);
         a++;
 
         char drone_id[8],lvy[8], lvx[8], tv[8], bat[16], stat[2];
@@ -754,15 +769,22 @@ void ControlCenter::log(int time)
         int ltv = std::stoi(tv);
         if (grid[ilvy][ilvx] < ltv)
         {
+            printf("Grid updated at [%d,%d] time:%d\n", ilvy, ilvx, ltv);  // Add this
             //printf("changing griddd  y : %d x : %d\n",ilvy,ilvx);
             grid[ilvy][ilvx] = ltv; //setting last_time verified in order to check verif
             drones[did].last_verified_x = ilvx;
             drones[did].last_verified_y = ilvy;
         }
 
+
         freeReplyObject(reply);
 
         // optimize
+    }
+    // Add summary print
+    if (a != last_log_count) {
+        printf("Processed %d drone logs at time %d\n", a, time);
+        last_log_count = a;
     }
     //printf("%d drones\n",a);
     // MONITOR AREA: Verifica che l'area verificata non diminuisca
