@@ -29,6 +29,14 @@ void assertReplyType(redisContext* c, redisReply* r, int type)
 {
     if (r == NULL)
         dbg_abort("NULL redisReply (error: %s)", c->errstr);
+
+    //printf("Got reply type: %d, Expected type: %d\n", r->type, type);
+
+
+    if (r->type == REDIS_REPLY_ERROR) {
+        printf("Redis Error: %s\n", r->str);
+    }
+
     if (r->type != type)
     {
         print_reply_types();
@@ -98,10 +106,25 @@ redisReply* send_redis_msg(redisContext* c, char* stream_name, char* message)
 }
 
 void initStreams(redisContext* c, const char* stream)
+
 {
-    redisReply* r = RedisCommand(c, ""
-                                    "XGROUP CREATE %s diameter $ MKSTREAM", // Create group and stream if needed
-                                    stream);
+
+    redisReply* r = RedisCommand(c,
+        "XGROUP CREATE %s diameter $ MKSTREAM",
+        stream);
+
+    if (r != NULL) {
+        // Handle successful creation (OK) or BUSYGROUP error
+        if (r->type == REDIS_REPLY_STATUS ||
+           (r->type == REDIS_REPLY_ERROR && strstr(r->str, "BUSYGROUP"))) {
+            freeReplyObject(r);
+            return;
+           }
+
+        // If we get here, something unexpected happened
+        printf("Unexpected reply type %d for stream %s\n", r->type, stream);
+    }
+
     assertReply(c, r);
     freeReplyObject(r);
 }

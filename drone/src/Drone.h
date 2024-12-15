@@ -1,18 +1,15 @@
 #ifndef DRONE_H
 #define DRONE_H
+#include <cstddef>
+#include <cstdlib>
+#include <cstring>
+#include <string>
+#include <new>
+#include <vector>
+#include <cmath>
+#include <unistd.h>
 #include "config.h"
 #include "con2redis.h"
-#include <vector>
-#include <math.h>
-#include <cstddef>
-#include <cstdio>
-#include <cstdlib>
-#include <time.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string>
-#include <cstring>
-#include <hiredis/hiredis.h>
 
 typedef struct {
     int sax; //subarea x 
