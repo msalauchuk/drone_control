@@ -38,10 +38,10 @@ add_library(common_lib
 
 # Control Center executable
 add_executable(control_center
-        control_center/src/ControlCenter.cpp
+        control_center/src/cc.cpp
         control_center/src/main.cpp
         control_center/src/config.h
-        control_center/src/ControlCenter.h
+        control_center/src/cc.h
 
 )
 

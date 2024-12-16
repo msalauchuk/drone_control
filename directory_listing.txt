@@ -11,14 +11,14 @@ redisfun.cpp
 
 
 ./control_center/src:
-ControlCenter.cpp
+cc.cpp
 ControlCenter.h
 config.h
 main.cpp
 
 
 ./drone/src:
-Drone.cpp
+drone.cpp
 Drone.h
 config.h
 main.cpp

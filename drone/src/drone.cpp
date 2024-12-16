@@ -1,10 +1,10 @@
-#include "Drone.h"
+#include "drone.h"
 #include "con2redis.h"
 #include <hiredis/hiredis.h>
 
 
 
-Drone::Drone(int did)
+drone::drone(int did)
 {
     id = did;
     battery = 100,
@@ -18,7 +18,7 @@ Drone::Drone(int did)
     last_t_v = -1;
 }
 
-void Swarm::addDrone(Drone drone)
+void Swarm::addDrone(drone drone)
 {
     // Aggiunge un drone al centro di controllo
     drones.push_back(drone);
@@ -28,7 +28,7 @@ void Swarm::init_drones(int n)
 {
     for (int i = 0; i < n; i++)
     {
-        addDrone(Drone(i));
+        addDrone(drone(i));
         printf("init id :%d\n", drones[i].id);
     }
 }
@@ -142,50 +142,50 @@ double get_random_charge_time()
 }
 
 // Calculate Euclidean distance from drone to control center sqrt(dx² + dy²)
-double Drone::get_distance_control_center()
+double drone::get_distance_control_center()
 {
     return sqrt(pow(x - CC_X, 2) + pow(y - CC_Y, 2));
 }
 
-bool Drone::is_charged()
+bool drone::is_charged()
 {
     return charge_time <= 0;
 }
 
-void Drone::charge()
+void drone::charge()
 {
     charge_time -= T; // Decrements by timestep T
 }
 
-bool Drone::is_home()
+bool drone::is_home()
 {
     return x == CC_X && y == CC_Y;
 }
 
-bool Drone::at_range_limit()
+bool drone::at_range_limit()
 {
     return distanceToCC <= 0;
 }
 
 // Calculate remaining flight range based on battery percentage
-double Drone::get_autonomy()
+double drone::get_autonomy()
 {
     return (battery / 100.0) * MAX_DISTANCE;
 }
 
 // Check if drone needs to return for charging
-bool Drone::is_low_battery()
+bool drone::is_low_battery()
 {
     // Need enough battery for round trip to control center plus safety margin
     return get_autonomy() <= (get_distance_control_center() * 2) + MARGIN;
 }
 
-void Drone::set_last_dist()
+void drone::set_last_dist()
 {
     distanceToCC = get_distance_control_center();
 }
 
-void Drone::send_replace_drone_msg(redisContext* c)
+void drone::send_replace_drone_msg(redisContext* c)
 {
 
     //subarea is 200m × 200m
@@ -294,7 +294,7 @@ void Drone::send_replace_drone_msg(redisContext* c)
 
 
 // Calculate normalized velocity vector towards destination
-void Drone::calc_velocity(double targetX, double targetY)
+void drone::calc_velocity(double targetX, double targetY)
 {
     // distance to target x,y
     double distanceToTargetX = targetX - x;
@@ -366,7 +366,7 @@ void reset_job(Job* job)
 }
 
 // Main movement function implementing different flight patterns
-void Drone::move(int t)
+void drone::move(int t)
 {
     // Decrease battery based on time step
     this->battery -= (100.0 / (1800.0 / T));
@@ -459,7 +459,7 @@ void Drone::move(int t)
     }
 }
 
-void Drone::tick(redisContext* c, int t)
+void drone::tick(redisContext* c, int t)
 {
     redisReply* reply;
     switch (this->status)
@@ -591,7 +591,7 @@ void Drone::tick(redisContext* c, int t)
                 assertReplyType(c, reply, REDIS_REPLY_STRING);
                 freeReplyObject(reply);
             }
-            //printf("Drone status: CHARGING\n");
+            //printf("drone status: CHARGING\n");
             break;
         }
     default:

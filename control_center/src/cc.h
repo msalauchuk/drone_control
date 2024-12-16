@@ -45,14 +45,14 @@ enum drone_status
 };
 
 
-class Drone
+class drone
 {
 private:
     // pos x will be t.c. (x -10) congruo 0 mod 20
 
 public:
     // Costruttore
-    Drone(int did)
+    drone(int did)
     {
         this->id = did;
         last_verified_x = -1;
@@ -77,11 +77,11 @@ enum Status
     STATUS_COUNT
 };
 
-class ControlCenter
+class cc
 {
 private:
     int pid;
-    std::vector<Drone> drones; // vector of drones ids, make another drone class
+    std::vector<drone> drones; // vector of drones ids, make another drone class
     std::vector<Job*> job_queue;
     int grid[WIDTH][HEIGHT]; // griglia 2d of time stamps in unix epoch, will be used to calculate verified time
     Status status;
@@ -93,13 +93,13 @@ private:
     int syncTimeout = 10000000; //timeout redis msgs
 
 public:
-    ControlCenter();
+    cc();
     double get_percentage(int curr_time);
     void send_substitute(int new_drone);
     void dumpsubarea(int curr);
     void init_grid();
     void print_status();
-    void addDrone(Drone drone);
+    void addDrone(drone drone);
     void init();
     void sync_and_wait();
     void tick();

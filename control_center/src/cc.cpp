@@ -1,8 +1,8 @@
-#include "ControlCenter.h"
+#include "cc.h"
 #include "../../redis/src/con2redis.h"
 #include <vector>
 
-void ControlCenter::print_status()
+void cc::print_status()
 {
     printf("status : %d\n", status);
 }
@@ -12,8 +12,8 @@ void print_parameters()
     printf("Horizon : %d\nDrones count: %d\n", HORIZON,DRONES_COUNT);
 }
 
-// Implementazione dei metodi della classe ControlCenter
-ControlCenter::ControlCenter()
+// Implementazione dei metodi della classe cc
+cc::cc()
 {
     /* Costruttore */
 }
@@ -31,13 +31,13 @@ redisReply* read_stream(redisContext* c, const char* stream_name)
     return reply;
 }
 
-void ControlCenter::addDrone(Drone drone)
+void cc::addDrone(drone drone)
 {
     // Aggiunge un drone al centro di controllo
     drones.push_back(drone);
 }
 
-void ControlCenter::init_grid()
+void cc::init_grid()
 {
     for (int i = 0; i < HEIGHT; i++)
     {
@@ -48,7 +48,7 @@ void ControlCenter::init_grid()
     }
 }
 
-void ControlCenter::init()
+void cc::init()
 {
     /* FASE 1: INIZIALIZZAZIONE VARIABILI BASE */
     this-> pid = getpid();
@@ -133,9 +133,9 @@ void ControlCenter::init()
     }
 }
 
-int ControlCenter::get_available_drone_id()
+int cc::get_available_drone_id()
 {
-    auto is_available = [](Drone drone) { return (drone.status == IDLE_D); };
+    auto is_available = [](drone drone) { return (drone.status == IDLE_D); };
     auto drone = std::find_if(drones.begin(), drones.end(), is_available);
     if (drone != drones.end())
     {
@@ -147,7 +147,7 @@ int ControlCenter::get_available_drone_id()
     }
 }
 
-void ControlCenter::sync_and_wait()
+void cc::sync_and_wait()
 {
     redisReply* reply;
 
@@ -270,7 +270,7 @@ Job* create_job(int say, int sax, int ny, int nx, int dx, int dy)
     return new_job;
 }
 
-void ControlCenter::send_substitute(int new_drone_id)
+void cc::send_substitute(int new_drone_id)
 {
     redisReply* rep;
     Job* job = job_queue.back();
@@ -290,7 +290,7 @@ void ControlCenter::send_substitute(int new_drone_id)
  * @param reply Risposta Redis contenente i dettagli del messaggio
  */
 
-void ControlCenter::handle_msg(const char* type, redisReply* reply)
+void cc::handle_msg(const char* type, redisReply* reply)
 {
 
     // enum BatteryMsgType {
@@ -412,7 +412,7 @@ void ControlCenter::handle_msg(const char* type, redisReply* reply)
     }
 }
 
-void ControlCenter::tick()
+void cc::tick()
 {
     switch (status)
     {
@@ -453,7 +453,7 @@ void ControlCenter::tick()
                     ReadStreamMsgVal(reply, 0, 0, 3, value); // Get 3rd element (drone_id)
                     int drone_id = std::stoi(value); // Convert to integer
                     // Create and add new drone to control center (add drones to the array)
-                    this->addDrone(Drone(drone_id)); // constructor with just the id init drone position at start
+                    this->addDrone(drone(drone_id)); // constructor with just the id init drone position at start
                 }
                 freeReplyObject(reply);
             }
@@ -620,7 +620,7 @@ bool is_verified(int last_v, int current_time)
     return last_v != -1 && ((double)(current_time - last_v) / T) <= (300.0 / T);
 }
 
-void ControlCenter::dumpsubarea(int cur)
+void cc::dumpsubarea(int cur)
 {
     printf("err %d\n", grid[54][148]);
     for (int i = 0; i < 20; i++)
@@ -638,7 +638,7 @@ void ControlCenter::dumpsubarea(int cur)
 
 // Calcola la percentuale di area totale che è stata verificata correttamente
 
-double ControlCenter::get_percentage(int curr_time)
+double cc::get_percentage(int curr_time)
 {
     int aa = 0; // Contatore dei punti verificati correttamente
     for (int i = 0; i < HEIGHT; i++)
@@ -662,7 +662,7 @@ double ControlCenter::get_percentage(int curr_time)
 
 
 // Verifica se l'area totale ha raggiunto la soglia minima di copertura (99%)
-bool ControlCenter::check_area(int curr_time)
+bool cc::check_area(int curr_time)
 {
     int aa = 0;
     for (int i = 0; i < HEIGHT; i++)
@@ -697,7 +697,7 @@ void save_to_csv(double va, int t, std::string filename)
     }
 }
 
-void ControlCenter::log(int time)
+void cc::log(int time)
 
 {
 
@@ -806,7 +806,7 @@ void ControlCenter::log(int time)
 }
 
 // clean up resources by deleting streams and free the context
-void ControlCenter::shutdown()
+void cc::shutdown()
 {
     redisReply* reply;
     for (int i = 0; i < DRONES_COUNT; i++)

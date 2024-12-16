@@ -42,9 +42,9 @@ enum drone_status{
     HOMING, // Return to CC
     CHARGING
 };
-class Drone {
+class drone {
 private:
-    // Attributi privati della classe Drone
+    // Attributi privati della classe drone
     double velx;
     double vely;
     double speed; //// 30 km/h to m/s * 2.4s = 20m per tick
@@ -63,8 +63,8 @@ public:
     drone_status status;
     int id; // Identificativo unico del drone
     Job * job;
-    // Costruttore e metodi pubblici della classe Drone
-    Drone(int id);
+    // Costruttore e metodi pubblici della classe drone
+    drone(int id);
     void tick(redisContext *c,int t);
     double get_distance_control_center();
     bool is_charged();
@@ -88,9 +88,9 @@ class Swarm {
 
         int block_time = 10000000; //timeout redis msgs
     public:
-        std::vector<Drone> drones;
+        std::vector<drone> drones;
         void init();
-        void addDrone(Drone drone);
+        void addDrone(drone drone);
         void init_drones(int n); // initializes the drones
         void await_sync(); //sync time w/ redis
         void tick(int t); // time tick

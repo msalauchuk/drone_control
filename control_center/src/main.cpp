@@ -9,7 +9,7 @@
  * - Il monitoraggio delle proprietà funzionali e non funzionali
  */
 
-#include "ControlCenter.h"
+#include "cc.h"
 #include "config.h"
 
 
@@ -28,7 +28,7 @@
 int main(int argc, char* argv[])
 {
     // defining the cc
-    ControlCenter cc;
+    cc cc;
     cc.init();
     print_parameters(); //print parameters to stdoutput for readability
 
