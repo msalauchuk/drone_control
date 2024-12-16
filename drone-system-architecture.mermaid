@@ -1,0 +1,50 @@
+graph TB
+    subgraph Control Center
+        CC[Control Center Core]
+        Grid[In-Memory Grid]
+        CC --> Grid
+        
+        subgraph Monitoring
+            CSV[CSV Logger]
+            Monitor[System Monitor]
+            CC --> CSV
+            CC --> Monitor
+        end
+    end
+
+    subgraph Redis
+        RS[(Redis Server)]
+        subgraph Streams
+            SS[Sync Stream]
+            DS[Drone Stream]
+            LS[Log Stream]
+            DRS[Drone Response Stream]
+        end
+        RS --> SS
+        RS --> DS
+        RS --> LS
+        RS --> DRS
+    end
+
+    subgraph Drone Swarm
+        D1[Drone 1]
+        D2[Drone 2]
+        DN[Drone N]
+    end
+
+    CC <--> RS
+    D1 <--> RS
+    D2 <--> RS
+    DN <--> RS
+
+    classDef redis fill:#A0522D,stroke:#6D1F00,color:white
+    classDef stream fill:#CD853F,stroke:#8B4513,color:white
+    classDef control fill:#4682B4,stroke:#27506F,color:white
+    classDef monitor fill:#5F9EA0,stroke:#2F4F4F,color:white
+    classDef drone fill:#6B8E23,stroke:#556B2F,color:white
+    
+    class RS redis
+    class SS,DS,LS,DRS stream
+    class CC,Grid control
+    class CSV,Monitor monitor
+    class D1,D2,DN drone
