@@ -1,5 +1,5 @@
 #include "ControlCenter.h"
-#include "../../con2redis/src/con2redis.h"
+#include "../../redis/src/con2redis.h"
 #include <vector>
 
 void ControlCenter::print_status()

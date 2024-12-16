@@ -21,7 +21,7 @@ link_directories(${HIREDIS_ROOT}/lib)
 
 # Common include directories
 include_directories(
-        ${CMAKE_SOURCE_DIR}/con2redis/src
+        ${CMAKE_SOURCE_DIR}/redis/src
         ${CMAKE_SOURCE_DIR}/control_center/src
         ${CMAKE_SOURCE_DIR}/drone/src
         ${CMAKE_SOURCE_DIR}
@@ -29,10 +29,10 @@ include_directories(
 
 # Common library sources
 add_library(common_lib
-        con2redis/src/readreply.cpp
-        con2redis/src/redisfun.cpp
-        con2redis/src/local.h
-        con2redis/src/con2redis.h
+        redis/src/readreply.cpp
+        redis/src/redisfun.cpp
+        redis/src/local.h
+        redis/src/con2redis.h
 
 )
 
