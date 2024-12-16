@@ -14,43 +14,46 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
 # Impostazioni macOS
 set(CMAKE_OSX_ARCHITECTURES "arm64")
 set(CMAKE_OSX_SYSROOT "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk")
-# Add Redis dependencies
+
+
+# Redis configuration
 set(HIREDIS_ROOT "/opt/homebrew/opt/hiredis")
-include_directories(${HIREDIS_ROOT}/include)
-link_directories(${HIREDIS_ROOT}/lib)
+find_package(hiredis REQUIRED)
 
 # Common include directories
 include_directories(
-        ${CMAKE_SOURCE_DIR}/redis/src
-        ${CMAKE_SOURCE_DIR}/control_center/src
-        ${CMAKE_SOURCE_DIR}/drone/src
+        ${CMAKE_SOURCE_DIR}/src/common/include
+        ${CMAKE_SOURCE_DIR}/src/redis_connector/include
+        ${CMAKE_SOURCE_DIR}/src/command_center/include
+        ${CMAKE_SOURCE_DIR}/src/drone_controller/include
         ${CMAKE_SOURCE_DIR}
 )
 
 # Common library sources
 add_library(common_lib
-        redis/src/readreply.cpp
-        redis/src/redisfun.cpp
-        redis/src/local.h
-        redis/src/con2redis.h
+        src/redis_connector/src/readreply.cpp
+        src/redis_connector/src/redis_client.cpp
+        src/redis_connector/include/local.h
+        src/redis_connector/include/connector.h
 
 )
 
+
 # Control Center executable
 add_executable(control_center
-        control_center/src/cc.cpp
-        control_center/src/main.cpp
-        control_center/src/config.h
-        control_center/src/cc.h
+        src/command_center/src/cc.cpp
+        src/command_center/src/main.cpp
+        src/command_center/include/config.h
+        src/command_center/include/cc.h
 
 )
 
 # Drone executable
 add_executable(drone
-        drone/src/Drone.cpp
-        drone/src/main.cpp
-        drone/src/config.h
-        drone/src/Drone.h
+        src/drone_controller/src/drone.cpp
+        src/drone_controller/src/main.cpp
+        src/drone_controller/include/config.h
+        src/drone_controller/include/drone.h
 )
 
 # Link common library and hiredis to both executables

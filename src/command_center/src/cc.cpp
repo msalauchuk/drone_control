@@ -1,5 +1,5 @@
-#include "cc.h"
-#include "../../redis/src/con2redis.h"
+#include "src/command_center/include/cc.h"
+#include "src/redis_connector/include/connector.h"
 #include <vector>
 
 void cc::print_status()

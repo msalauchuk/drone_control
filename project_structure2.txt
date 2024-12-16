@@ -1,0 +1,12 @@
+
+./src
+./src/redis_connector
+./src/redis_connector/include
+./src/redis_connector/src
+./src/common
+./src/drone_controller
+./src/drone_controller/include
+./src/drone_controller/src
+./src/command_center
+./src/command_center/include
+./src/command_center/src

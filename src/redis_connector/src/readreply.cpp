@@ -1,5 +1,5 @@
-#include "con2redis.h"
-#include "local.h"
+#include "src/redis_connector/include/connector.h"
+#include "src/redis_connector/include/local.h"
 
 
 int ReadNumStreams(redisReply* r)

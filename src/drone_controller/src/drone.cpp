@@ -1,7 +1,7 @@
-#include "drone.h"
-#include "con2redis.h"
+#include "src/drone_controller/include/drone.h"
+#include "src/redis_connector/include/connector.h"
 #include <hiredis/hiredis.h>
-
+#include "src/drone_controller/include/config.h"
 
 
 drone::drone(int did)

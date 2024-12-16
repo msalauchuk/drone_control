@@ -9,8 +9,8 @@
  * - Il monitoraggio delle proprietà funzionali e non funzionali
  */
 
-#include "cc.h"
-#include "config.h"
+#include "src/command_center/include/cc.h"
+#include "src/command_center/include/config.h"
 
 
 

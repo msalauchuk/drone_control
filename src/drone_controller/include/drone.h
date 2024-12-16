@@ -8,8 +8,7 @@
 #include <vector>
 #include <cmath>
 #include <unistd.h>
-#include "config.h"
-#include "con2redis.h"
+#include "src/redis_connector/include/connector.h"
 
 typedef struct {
     int sax; //subarea x 
