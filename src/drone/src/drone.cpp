@@ -39,7 +39,7 @@ void Swarm::await_sync()
 
 
     // receive synchronization messages from the Redis sync_stream2
-    reply = read_1msg_blocking(c, "diameter", "drone", block_time, sync_stream);
+    reply = stream_read_message_blocking(c, "diameter", "drone", block_time, sync_stream);
     freeReplyObject(reply);
 
     // we could send the time t in the stream or get it calculated from the drones
@@ -50,7 +50,7 @@ void Swarm::await_sync()
     if (DEBUG)
     {
         //dumpReply(reply,0);
-        assertReplyType(c, reply, REDIS_REPLY_STRING);
+        validate_reply_type(c, reply, REDIS_REPLY_STRING);
     }
     freeReplyObject(reply);
 }
@@ -109,12 +109,12 @@ Job* get_job_from_reply(redisReply* reply)
     //low_battery msgtype e.g. type low_battery did 123 cy 0 cx 0 nexty 40 nextx 65 dirx -1 diry -1
     char say[8],sax[8],ny[8],nx[8],dx[8], dy[8];
 
-    ReadStreamMsgVal(reply, 0, 0, 5, say);
-    ReadStreamMsgVal(reply, 0, 0, 7, sax);
-    ReadStreamMsgVal(reply, 0, 0, 9, ny);
-    ReadStreamMsgVal(reply, 0, 0, 11, nx);
-    ReadStreamMsgVal(reply, 0, 0, 13, dx);
-    ReadStreamMsgVal(reply, 0, 0, 15, dy);
+    get_stream_message_field_value(reply, 0, 0, 5, say);
+    get_stream_message_field_value(reply, 0, 0, 7, sax);
+    get_stream_message_field_value(reply, 0, 0, 9, ny);
+    get_stream_message_field_value(reply, 0, 0, 11, nx);
+    get_stream_message_field_value(reply, 0, 0, 13, dx);
+    get_stream_message_field_value(reply, 0, 0, 15, dy);
 
     // Allocate and initialize new Job
     Job* job = (Job*)malloc(sizeof(Job));
@@ -287,7 +287,7 @@ void drone::send_replace_drone_msg(redisContext* c)
                                                   , "drone_stream", "low_battery", id, job->say, job->sax, nexty
                                                   , nextx, ndx, job->dy); //
 
-    assertReplyType(c, reply, REDIS_REPLY_STRING);
+    validate_reply_type(c, reply, REDIS_REPLY_STRING);
     freeReplyObject(reply);
     //distanceToCC += 400;
 }
@@ -473,7 +473,7 @@ void drone::tick(redisContext* c, int t)
             reply = RedisCommand(c, "XADD %s * type awk did %d", stream_name, id);
             printf("awk msg: ");
 
-            assertReplyType(c, reply, REDIS_REPLY_STRING);
+            validate_reply_type(c, reply, REDIS_REPLY_STRING);
             freeReplyObject(reply);
 
             // Transition to READY state after successful registration
@@ -491,7 +491,7 @@ void drone::tick(redisContext* c, int t)
             // read drone's personal stream
             reply = (redisReply*)redisCommand(c, "XREADGROUP GROUP %s %s COUNT 1 NOACK STREAMS %d >",
                                               "diameter", "drones", id);
-            assertReply(c, reply);
+            validate_reply(c, reply);
 
             // If no messages, remain idle
             if (reply->elements == 0)
@@ -588,7 +588,7 @@ void drone::tick(redisContext* c, int t)
 
                 const char* stream_name = "drone_stream";
                 reply = RedisCommand(c, "XADD %s * type recharged did %d", stream_name, id);
-                assertReplyType(c, reply, REDIS_REPLY_STRING);
+                validate_reply_type(c, reply, REDIS_REPLY_STRING);
                 freeReplyObject(reply);
             }
             //printf("drone status: CHARGING\n");
@@ -626,7 +626,7 @@ void Swarm::log()
         reply = RedisCommand(c, "XADD %s * did %d battery %f lvy %d lvx %d tv %d status %d"
                                           , log_stream, i, drones[i].battery, drones[i].last_v_y, drones[i].last_v_x
                                           , drones[i].last_t_v, drones[i].status);
-        assertReply(c, reply);
+        validate_reply(c, reply);
         freeReplyObject(reply);
     }
 }

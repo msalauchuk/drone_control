@@ -1,11 +1,31 @@
-#include "connector.h"
 #include "debug_config.h"
+#include "connector.h"
 
 
 int ReadNumStreams(redisReply* r)
 {
     return (r->elements); // Ritorna il numero totale di streams
 }
+
+
+// even entry field, odd entry field value
+int get_stream_message_field_value(redisReply* r, long unsigned int streamnum, int msgnum, int entry, char* value)
+{
+
+    // Reads a specific field value from the message
+    strcpy(value, r->element[streamnum]->element[1]->element[msgnum]->element[1]->element[entry]->str);
+    return (0);
+}
+
+// k-th stream, i-th msg id
+int ReadStreamMsgNumVal(redisReply* r, long unsigned int streamnum, int msgnum)
+{
+    // Ritorna il numero di valori nel messaggio specificato
+
+    return (r->element[streamnum]->element[1]->element[msgnum]->element[1]->elements);
+}
+
+
 
 
 // reads k-th stream name
@@ -35,19 +55,3 @@ int ReadStreamNumMsgID(redisReply* r, long unsigned int streamnum, int msgnum, c
 }
 
 
-// k-th stream, i-th msg id
-int ReadStreamMsgNumVal(redisReply* r, long unsigned int streamnum, int msgnum)
-{
-    // Ritorna il numero di valori nel messaggio specificato
-
-    return (r->element[streamnum]->element[1]->element[msgnum]->element[1]->elements);
-}
-
-// even entry field, odd entry field value
-int ReadStreamMsgVal(redisReply* r, long unsigned int streamnum, int msgnum, int entry, char* value)
-{
-
-    // Legge un valore specifico dal messaggio
-    strcpy(value, r->element[streamnum]->element[1]->element[msgnum]->element[1]->element[entry]->str);
-    return (0);
-}

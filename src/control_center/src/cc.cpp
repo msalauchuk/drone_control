@@ -27,7 +27,7 @@ redisReply* read_stream(redisContext* c, const char* stream_name)
 {
     // Read from the stream starting from the beginning
     redisReply* reply = (redisReply*)redisCommand(c, "XREAD STREAMS %s 0", stream_name);
-    assertReply(c, reply);
+    validate_reply(c, reply);
     return reply;
 }
 
@@ -91,26 +91,26 @@ void cc::init()
 
     // Stream per risposte dai droni
     reply = (redisReply*)redisCommand(c, "DEL %s", droneResponseStream);
-    assertReplyType(c, reply, REDIS_REPLY_INTEGER);
-    initStreams(c, droneResponseStream);
+    validate_reply_type(c, reply, REDIS_REPLY_INTEGER);
+    stream_initialize_group(c, droneResponseStream);
     freeReplyObject(reply);
 
     // Stream per messaggi dal centro di controllo
     reply = (redisReply*)redisCommand(c, "DEL %s", "sync_stream2");
-    assertReplyType(c, reply, REDIS_REPLY_INTEGER);
-    initStreams(c, "sync_stream2");
+    validate_reply_type(c, reply, REDIS_REPLY_INTEGER);
+    stream_initialize_group(c, "sync_stream2");
     freeReplyObject(reply);
 
     // Stream per comunicazioni generali dai droni
     reply = (redisReply*)redisCommand(c, "DEL %s", drone_stream);
-    assertReplyType(c, reply, REDIS_REPLY_INTEGER);
-    initStreams(c, drone_stream);
+    validate_reply_type(c, reply, REDIS_REPLY_INTEGER);
+    stream_initialize_group(c, drone_stream);
     freeReplyObject(reply);
 
     //log stream
     reply = (redisReply*)redisCommand(c, "DEL %s", log_stream);
-    assertReplyType(c, reply, REDIS_REPLY_INTEGER);
-    initStreams(c, log_stream);
+    validate_reply_type(c, reply, REDIS_REPLY_INTEGER);
+    stream_initialize_group(c, log_stream);
     freeReplyObject(reply);
 
     /* FASE 5: SETUP STREAMS INDIVIDUALI PER OGNI DRONE */
@@ -122,13 +122,13 @@ void cc::init()
 
         // Elimina stream esistente se presente
         reply = (redisReply*)redisCommand(c, "DEL %d", i);
-        assertReplyType(c, reply, REDIS_REPLY_INTEGER);
+        validate_reply_type(c, reply, REDIS_REPLY_INTEGER);
         freeReplyObject(reply);
 
 
         // Crea nuovo stream con gruppo consumer
         reply = RedisCommand(c, "XGROUP CREATE %d diameter $ MKSTREAM", i);
-        assertReply(c, reply);
+        validate_reply(c, reply);
         freeReplyObject(reply);
     }
 }
@@ -171,7 +171,7 @@ void cc::sync_and_wait()
     }
 
     // Verifica che la risposta sia di tipo stringa (conferma corretta scrittura)
-    assertReplyType(c, reply,REDIS_REPLY_STRING);
+    validate_reply_type(c, reply,REDIS_REPLY_STRING);
 
     // Libera memoria allocata per la risposta
     freeReplyObject(reply);
@@ -185,10 +185,10 @@ void cc::sync_and_wait()
     // syncTimeout: tempo massimo di attesa
 
     //# Lettura bloccante (CC attende risposta)
-    reply = read_1msg_blocking(c, "diameter", "cc", syncTimeout, droneResponseStream);
+    reply = stream_read_message_blocking(c, "diameter", "cc", syncTimeout, droneResponseStream);
 
     // Verifica validità della risposta
-    assertReply(c, reply);
+    validate_reply(c, reply);
     //dumpReply(reply,0);
     freeReplyObject(reply);
 }
@@ -341,13 +341,13 @@ void cc::handle_msg(const char* type, redisReply* reply)
 
             // Estrae i valori dal messaggio Redis
             //create job using next coord. and subarea coord.
-            ReadStreamMsgVal(reply, 0, 0, 3, did); // ID del drone con batteria scarica
-            ReadStreamMsgVal(reply, 0, 0, 5, say); // Coordinate correnti e successive
-            ReadStreamMsgVal(reply, 0, 0, 7, sax);
-            ReadStreamMsgVal(reply, 0, 0, 9, ny);
-            ReadStreamMsgVal(reply, 0, 0, 11, nx);
-            ReadStreamMsgVal(reply, 0, 0, 13, dx);
-            ReadStreamMsgVal(reply, 0, 0, 15, dy);
+            get_stream_message_field_value(reply, 0, 0, 3, did); // ID del drone con batteria scarica
+            get_stream_message_field_value(reply, 0, 0, 5, say); // Coordinate correnti e successive
+            get_stream_message_field_value(reply, 0, 0, 7, sax);
+            get_stream_message_field_value(reply, 0, 0, 9, ny);
+            get_stream_message_field_value(reply, 0, 0, 11, nx);
+            get_stream_message_field_value(reply, 0, 0, 13, dx);
+            get_stream_message_field_value(reply, 0, 0, 15, dy);
 
 
             // Crea un nuovo job con le coordinate attuali e successive
@@ -374,7 +374,7 @@ void cc::handle_msg(const char* type, redisReply* reply)
                                             , new_drone_id, "task", new_drone_id, job->say,
                                             job->sax, job->ny, job->nx, job->dx,
                                             job->dy);
-            assertReplyType(c, rep, REDIS_REPLY_STRING);
+            validate_reply_type(c, rep, REDIS_REPLY_STRING);
 
             // Aggiorna lo stato dei droni
             // Assegna il job al nuovo drone e lo mette in volo
@@ -392,7 +392,7 @@ void cc::handle_msg(const char* type, redisReply* reply)
             // Gestisce l'inizio della ricarica di un drone
             // Formato messaggio: type charging did 123
             char did[4];
-            ReadStreamMsgVal(reply, 0, 0, 3, did);
+            get_stream_message_field_value(reply, 0, 0, 3, did);
             this->drones[atoi(did)].status = CHARGING_D;
 
             // change is status to charging
@@ -404,7 +404,7 @@ void cc::handle_msg(const char* type, redisReply* reply)
             // Gestisce il completamento della ricarica di un drone
             // Formato messaggio: type recharged did 123
             char did[4];
-            ReadStreamMsgVal(reply, 0, 0, 3, did);
+            get_stream_message_field_value(reply, 0, 0, 3, did);
             this->drones[atoi(did)].status = IDLE_D;
             // change id status to IDLE
             break;
@@ -441,16 +441,16 @@ void cc::tick()
 
                 // Wait for each drone to send registration message
 
-                reply = read_1msg_blocking(c, "diameter", "cc", 10000, drone_stream);
+                reply = stream_read_message_blocking(c, "diameter", "cc", 10000, drone_stream);
 
                 // Blocks for up to 10 seconds waiting for message
 
 
-                assertReply(this->c, reply);
+                validate_reply(this->c, reply);
                 if (reply->type != REDIS_REPLY_NIL && reply->elements > 0)
                 {
                     // Message format expected: type wake did {drone_id}
-                    ReadStreamMsgVal(reply, 0, 0, 3, value); // Get 3rd element (drone_id)
+                    get_stream_message_field_value(reply, 0, 0, 3, value); // Get 3rd element (drone_id)
                     int drone_id = std::stoi(value); // Convert to integer
                     // Create and add new drone to control center (add drones to the array)
                     this->addDrone(drone(drone_id)); // constructor with just the id init drone position at start
@@ -542,7 +542,7 @@ void cc::tick()
                         job->dy
                         ); //job.msg() returns the formated job in a string-type in order to send it via stream
                     //dumpReply(reply,0);
-                    assertReplyType(c, reply, REDIS_REPLY_STRING);
+                    validate_reply_type(c, reply, REDIS_REPLY_STRING);
 
                     freeReplyObject(reply);
                     // change drone status to running
@@ -580,7 +580,7 @@ void cc::tick()
                                                   "diameter",
                                                   "cc",
                                                   drone_stream);
-                assertReply(c, reply);
+                validate_reply(c, reply);
 
 
                 if (reply->type == REDIS_REPLY_NIL || reply->elements == 0)
@@ -588,7 +588,7 @@ void cc::tick()
                     freeReplyObject(reply);
                     continue; // Se non ci sono messaggi, passa al prossimo drone
                 }
-                ReadStreamMsgVal(reply, 0, 0, 1, msg_type); // reading 1 == msg type
+                get_stream_message_field_value(reply, 0, 0, 1, msg_type); // reading 1 == msg type
 
                 // handle low_battery/charging/recharged
                 handle_msg(msg_type, reply);
@@ -737,12 +737,12 @@ void cc::log(int time)
 
         // Estrae informazioni dal messaggio di log
 
-        ReadStreamMsgVal(reply, 0, 0, 1, drone_id);
-        ReadStreamMsgVal(reply, 0, 0, 3, bat);
-        ReadStreamMsgVal(reply, 0, 0, 5, lvy);
-        ReadStreamMsgVal(reply, 0, 0, 7, lvx);
-        ReadStreamMsgVal(reply, 0, 0, 9, tv);
-        ReadStreamMsgVal(reply, 0, 0, 11, stat);
+        get_stream_message_field_value(reply, 0, 0, 1, drone_id);
+        get_stream_message_field_value(reply, 0, 0, 3, bat);
+        get_stream_message_field_value(reply, 0, 0, 5, lvy);
+        get_stream_message_field_value(reply, 0, 0, 7, lvx);
+        get_stream_message_field_value(reply, 0, 0, 9, tv);
+        get_stream_message_field_value(reply, 0, 0, 11, stat);
 
         // MONITOR: Verifica delle condizioni critiche
         int did = std::stoi(drone_id);
@@ -813,17 +813,17 @@ void cc::shutdown()
     {
         const char* stream_n = int_to_string(i);
         reply = (redisReply*)RedisCommand(c, "DEL %s", stream_n);
-        assertReply(c, reply);
+        validate_reply(c, reply);
         freeReplyObject(reply);
         free(drones[i].job);
     }
 
     reply = (redisReply*)redisCommand(c, "DEL %s", drone_stream);
-    assertReply(c, reply);
+    validate_reply(c, reply);
     freeReplyObject(reply);
 
     reply = (redisReply*)redisCommand(c, "DEL %s", droneResponseStream);
-    assertReply(c, reply);
+    validate_reply(c, reply);
     freeReplyObject(reply);
 
     redisFree(this->c);

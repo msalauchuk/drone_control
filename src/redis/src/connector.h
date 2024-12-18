@@ -9,6 +9,11 @@
 
 
 // macros
+
+#define RedisCommand(fmt, ...)			\
+(redisReply*) redisCommand(fmt, __VA_ARGS__)
+
+
 #define dbg_log(fmt, ... )			\
     do { \
         fprintf(stderr, "%s:%d : " fmt "\n", __FILE__, __LINE__,__VA_ARGS__); \
@@ -21,23 +26,20 @@
     } while (0)
 
 
-#define RedisCommand(fmt, ...)			\
-  (redisReply*) redisCommand(fmt, __VA_ARGS__)
 
-
-redisReply* send_redis_msg(redisContext* c, char* stream_name, char* message);
+redisReply* stream_publish_message(redisContext* c, char* stream_name, char* message);
 
 redisReply* read_1msg(redisContext* c, const char* group, const char* consumer, const char* stream_name);
 
-redisReply* read_1msg_blocking(redisContext* c, const char* group, const char* consumer, int block,
+redisReply* stream_read_message_blocking(redisContext* c, const char* group, const char* consumer, int block,
                                const char* stream_name);
 
-void assertReplyType(redisContext* c, redisReply* r, int type);
+void validate_reply_type(redisContext* c, redisReply* r, int type);
 
-void assertReply(redisContext* c, redisReply* r);
+void validate_reply(redisContext* c, redisReply* r);
 
 
-void initStreams(redisContext* c, const char* stream);
+void stream_initialize_group(redisContext* c, const char* stream);
 
 void ReadStreamReply(redisReply* r, int indent, int readstatus);
 
@@ -51,6 +53,6 @@ int ReadStreamNumMsgID(redisReply* r, long unsigned int streamnum, int msgnum, c
 
 int ReadStreamMsgNumVal(redisReply* r, long unsigned int streamnum, int msgnum);
 
-int ReadStreamMsgVal(redisReply* r, long unsigned int streamnum, int msgnum, int entry, char* fval);
+int get_stream_message_field_value(redisReply* r, long unsigned int streamnum, int msgnum, int entry, char* fval);
 
 #endif

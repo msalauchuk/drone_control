@@ -2,30 +2,13 @@
 #include "debug_config.h"
 
 
-// Utility function to print all Redis reply types for debugging
 
-void print_reply_types()
-{
-    printf("REDIS_REPLY_STRING=%d,\
-REDIS_REPLY_STATUS=%d,\
-REDIS_REPLY_INTEGER=%d,\
-REDIS_REPLY_NIL=%d,\
-REDIS_REPLY_ERROR=%d,\
-REDIS_REPLY_ARRAY=%d\n",
-           REDIS_REPLY_STRING,
-           REDIS_REPLY_STATUS,
-           REDIS_REPLY_INTEGER,
-           REDIS_REPLY_NIL,
-           REDIS_REPLY_ERROR,
-           REDIS_REPLY_ARRAY
-    );
-}
 
 
 // Validates that a Redis reply is of the expected type
 // Aborts if reply is NULL or doesn't match expected type
 
-void assertReplyType(redisContext* c, redisReply* r, int type)
+void validate_reply_type(redisContext* c, redisReply* r, int type)
 {
     if (r == NULL)
         dbg_abort("NULL redisReply (error: %s)", c->errstr);
@@ -48,7 +31,7 @@ void assertReplyType(redisContext* c, redisReply* r, int type)
 // Simple validation that a Redis reply exists
 // Aborts if reply is NULL
 
-void assertReply(redisContext* c, redisReply* r)
+void validate_reply(redisContext* c, redisReply* r)
 {
     if (r == NULL)
         dbg_abort("NULL redisReply (error: %s)", c->errstr);
@@ -65,14 +48,14 @@ redisReply* read_1msg(redisContext* c, const char* group, const char* consumer, 
                                                   consumer, // Consumer name within the group
                                                   stream_name // Stream to read from
                                                   );
-    assertReply(c, reply);
+    validate_reply(c, reply);
     return reply;
 }
 
 // Reads a single message from a Redis stream using consumer groups
 // Blocking read with timeout
 
-redisReply* read_1msg_blocking(redisContext* c, const char* group, const char* consumer, int block,
+redisReply* stream_read_message_blocking(redisContext* c, const char* group, const char* consumer, int block,
                                const char* stream_name)
 {
     redisReply* reply = (redisReply*)redisCommand(
@@ -85,14 +68,14 @@ redisReply* read_1msg_blocking(redisContext* c, const char* group, const char* c
 
     );
 
-    assertReply(c, reply);
+    validate_reply(c, reply);
     return reply;
 }
 
 
 // Sends a message to a Redis stream
 
-redisReply* send_redis_msg(redisContext* c, char* stream_name, char* message)
+redisReply* stream_publish_message(redisContext* c, char* stream_name, char* message)
 {
     redisReply* reply = (redisReply*)redisCommand(
         c,
@@ -101,11 +84,11 @@ redisReply* send_redis_msg(redisContext* c, char* stream_name, char* message)
         message // Message content
     );
 
-    assertReply(c, reply);
+    validate_reply(c, reply);
     return reply;
 }
 
-void initStreams(redisContext* c, const char* stream)
+void stream_initialize_group(redisContext* c, const char* stream)
 
 {
 
@@ -125,6 +108,24 @@ void initStreams(redisContext* c, const char* stream)
         printf("Unexpected reply type %d for stream %s\n", r->type, stream);
     }
 
-    assertReply(c, r);
+    validate_reply(c, r);
     freeReplyObject(r);
+}
+
+
+void print_reply_types()
+{
+    printf("REDIS_REPLY_STRING=%d,\
+REDIS_REPLY_STATUS=%d,\
+REDIS_REPLY_INTEGER=%d,\
+REDIS_REPLY_NIL=%d,\
+REDIS_REPLY_ERROR=%d,\
+REDIS_REPLY_ARRAY=%d\n",
+           REDIS_REPLY_STRING,
+           REDIS_REPLY_STATUS,
+           REDIS_REPLY_INTEGER,
+           REDIS_REPLY_NIL,
+           REDIS_REPLY_ERROR,
+           REDIS_REPLY_ARRAY
+    );
 }
