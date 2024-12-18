@@ -90,9 +90,9 @@ void cc::init()
     redisReply* reply;
 
     // Stream per risposte dai droni
-    reply = (redisReply*)redisCommand(c, "DEL %s", droneResponseStream);
+    reply = (redisReply*)redisCommand(c, "DEL %s", drone_ack_stream);
     validate_reply_type(c, reply, REDIS_REPLY_INTEGER);
-    stream_initialize_group(c, droneResponseStream);
+    stream_initialize_group(c, drone_ack_stream);
     freeReplyObject(reply);
 
     // Stream per messaggi dal centro di controllo
@@ -185,7 +185,7 @@ void cc::sync_and_wait()
     // syncTimeout: tempo massimo di attesa
 
     //# Lettura bloccante (CC attende risposta)
-    reply = stream_read_message_blocking(c, "diameter", "cc", syncTimeout, droneResponseStream);
+    reply = stream_read_message_blocking(c, "diameter", "cc", syncTimeout, drone_ack_stream);
 
     // Verifica validità della risposta
     validate_reply(c, reply);
@@ -822,7 +822,7 @@ void cc::shutdown()
     validate_reply(c, reply);
     freeReplyObject(reply);
 
-    reply = (redisReply*)redisCommand(c, "DEL %s", droneResponseStream);
+    reply = (redisReply*)redisCommand(c, "DEL %s", drone_ack_stream);
     validate_reply(c, reply);
     freeReplyObject(reply);
 

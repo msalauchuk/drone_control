@@ -43,9 +43,9 @@ void DroneFleet::sync_with_control_center()
     freeReplyObject(reply);
 
     // we could send the time t in the stream or get it calculated from the drones
-    // Send a synchronization message to the Redis sync_stream1
+    // Send a synchronization message to the Redis drone_ack
     const char* message = "sync";
-    reply = RedisCommand(c, "XADD %s * type %s", "sync_stream1", message);
+    reply = RedisCommand(c, "XADD %s * type %s", "drone_ack", message);
 
     if (DEBUG)
     {

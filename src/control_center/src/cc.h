@@ -87,7 +87,7 @@ private:
     Status status;
     bool area_verified;
     redisContext* c; // redis conn
-    const char* droneResponseStream = "sync_stream1";
+    const char* drone_ack_stream = "drone_ack";
     const char* drone_stream = "drone_stream";
     const char* log_stream = "log_stream";
     int syncTimeout = 10000000; //timeout redis msgs
