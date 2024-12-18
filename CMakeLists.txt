@@ -29,10 +29,10 @@ include_directories(
 
 # Common library sources
 add_library(common_lib
-        src/redis/src/readreply.cpp
-        src/redis/src/redisfun.cpp
-        src/redis/src/local.h
-        src/redis/src/con2redis.h
+        src/redis/src/redis_message_parser.cpp
+        src/redis/src/redis_client.cpp
+        src/redis/src/debug_config.h
+        src/redis/src/connector.h
 
 )
 

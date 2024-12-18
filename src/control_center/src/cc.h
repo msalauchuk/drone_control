@@ -3,7 +3,7 @@
 #include <vector>
 #include <time.h>
 #include "config.h"
-#include "../../redis/src/con2redis.h"
+#include "../../redis/src/connector.h"
 #include <math.h>
 #include <cstddef>
 #include <cstdio>

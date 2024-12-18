@@ -1,6 +1,6 @@
-#ifndef con2redis_h
+#ifndef connector
 
-#define con2redis_h
+#define connector
 
 #include <stdio.h>
 #include <stdlib.h>

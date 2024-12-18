@@ -4,10 +4,10 @@ dump.rdb
 CMakeLists.txt
 
 ./con2redis/src:
-con2redis.h
-local.h
-readreply.cpp
-redisfun.cpp
+connector.h
+debug_config.h
+redis_message_parser.cpp
+redis_client.cpp
 
 
 ./control_center/src:

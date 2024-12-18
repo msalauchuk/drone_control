@@ -1,5 +1,5 @@
-#ifndef local_h
-#define local_h
+#ifndef debug_config_h
+#define debug_config_h
 
 #include <stdio.h>
 #include <stdlib.h>

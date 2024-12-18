@@ -1,5 +1,5 @@
 #include "drone.h"
-#include "src/redis/src/con2redis.h"
+#include "src/redis/src/connector.h"
 #include <hiredis/hiredis.h>
 
 
