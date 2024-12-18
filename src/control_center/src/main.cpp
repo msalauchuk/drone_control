@@ -10,7 +10,7 @@
  */
 
 #include "cc.h"
-#include "config.h"
+#include "src/common/system_config.h"
 
 
 

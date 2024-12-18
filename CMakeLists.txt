@@ -24,6 +24,7 @@ include_directories(
         ${CMAKE_SOURCE_DIR}src/redis/src
         ${CMAKE_SOURCE_DIR}src/control_center/src
         ${CMAKE_SOURCE_DIR}src/drone/src
+        ${CMAKE_SOURCE_DIR}/src/common/include
         ${CMAKE_SOURCE_DIR}
 )
 
@@ -40,7 +41,6 @@ add_library(common_lib
 add_executable(control_center
         src/control_center/src/cc.cpp
         src/control_center/src/main.cpp
-        src/control_center/src/config.h
         src/control_center/src/cc.h
 
 )
@@ -49,7 +49,6 @@ add_executable(control_center
 add_executable(drone
         src/drone/src/Drone.cpp
         src/drone/src/main.cpp
-        src/drone/src/config.h
         src/drone/src/Drone.h
 )
 

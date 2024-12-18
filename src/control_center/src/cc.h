@@ -2,7 +2,7 @@
 #define CONTROL_CENTER_H
 #include <vector>
 #include <time.h>
-#include "config.h"
+#include "src/common/system_config.h"
 #include "../../redis/src/connector.h"
 #include <math.h>
 #include <cstddef>

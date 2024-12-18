@@ -8,7 +8,7 @@
 #include <vector>
 #include <cmath>
 #include <unistd.h>
-#include "config.h"
+#include "src/common/system_config.h"
 #include "src/redis/src/connector.h"
 
 typedef struct {
