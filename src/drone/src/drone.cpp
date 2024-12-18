@@ -38,7 +38,7 @@ void DroneFleet::sync_with_control_center()
     redisReply* reply;
 
 
-    // receive synchronization messages from the Redis sync_stream2
+    // receive synchronization messages from the Redis time_sync
     reply = stream_read_message_blocking(c, "diameter", "drone", block_time, sync_stream);
     freeReplyObject(reply);
 
@@ -466,12 +466,12 @@ void drone::tick(redisContext* c, int t)
     {
     case STARTUP:
         {
-            printf("startup\n");
+            printf("start\n");
             // Send awakening message to control center via drone_stream
             //const char *message_id = "*"; // Send to the latest message in the stream
             const char* stream_name = "drone_stream";
             reply = RedisCommand(c, "XADD %s * type awk did %d", stream_name, id);
-            printf("awk msg: ");
+            printf("drone_registered msg: ");
 
             validate_reply_type(c, reply, REDIS_REPLY_STRING);
             freeReplyObject(reply);

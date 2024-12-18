@@ -96,9 +96,9 @@ void cc::init()
     freeReplyObject(reply);
 
     // Stream per messaggi dal centro di controllo
-    reply = (redisReply*)redisCommand(c, "DEL %s", "sync_stream2");
+    reply = (redisReply*)redisCommand(c, "DEL %s", "time_sync");
     validate_reply_type(c, reply, REDIS_REPLY_INTEGER);
-    stream_initialize_group(c, "sync_stream2");
+    stream_initialize_group(c, "time_sync");
     freeReplyObject(reply);
 
     // Stream per comunicazioni generali dai droni
@@ -160,11 +160,11 @@ void cc::sync_and_wait()
     const char* syncMessage = "Sync";
 
     // Esegue comando Redis XADD per aggiungere messaggio allo stream
-    // sync_stream2: nome dello stream
+    // time_sync: nome dello stream
     // message_id: ID del messaggio ("*" per auto-generazione)
     // type: campo del messaggio
     // message: valore del campo type
-    reply = (redisReply*)redisCommand(c, "XADD %s %s type %s", "sync_stream2", messageId, syncMessage);
+    reply = (redisReply*)redisCommand(c, "XADD %s %s type %s", "time_sync", messageId, syncMessage);
     if (DEBUG)
     {
         //dumpReply(reply,0);
@@ -427,13 +427,6 @@ void cc::tick()
             char value[8];
             for (int i = 0; i < DRONES_COUNT; i++)
             {
-                //should check type remember later + format
-                // first field = type, 2nd drone_id
-                /* define msg types later as integers
-                    wake = 0 ,
-
-                    */
-                // field value example should be 0 , 0
                 if (DEBUG)
                 {
                     //printf("drone n: %d\n",i);
@@ -466,52 +459,11 @@ void cc::tick()
         }
     case READY:
         {
-            //ready
-            // calcola aree
-            /*Sub area should be verifiable in <=5 min with just 1 drone
-              since a drone flyes at 30km/h, in 5 min it can cover a distance of
-              2.5km or 125 points each 20 m apart
-              so we need to calculate 300*300(area with points already 20 m apart)/125
-              which are roughly 720 sub areas
-              so we need atleast 720 drones + drones for when the battery is over
-
-              estimated drones 720 * time of charge / autonomy = 8k drones*/
-            // we ve got to keep in mind that the drones which are doing the verify need also to
-            //come back to the starter position within the area before the 5 min mark
-            // so the subarea must be a square of side x | x^2 + sqrt(2x^2) = 125
-            // x = 10.495 so we round down to 10
-            // subareas become then 10 x 10 points spaced 20 m apart
-            // Total area gets divided in 900 sub areas of 100 points(20 m apart)
-            // so there are 30 points on each axis in order to obtain the sub areas
-
-            /*   subarea 10x10 points
-                +------+------+------+------+------+(300x300 * (points) 20 m apart)
-                |***** |***** |***** |***** |***** |
-                |***** |***** |***** |***** |***** |
-                |***** |***** |***** |***** |***** |
-                +------+------+------+------+------+
-                |***** |***** |***** |***** |***** |
-                |***** |***** |***** |***** |***** |
-                |***** |***** |***** |***** |***** |
-                +------+------+------+------+------+
-                |***** |***** |***** |***** |***** |
-                |***** |***** |***** |***** |***** |
-                |***** |***** |***** |***** |***** |
-                +------+------+------+------+------+
-                (30x30 subareas)
-*/
-            //every drone gets the top-left coordinate, starting point(sp), and starting direction(sdx)  as [1,-1] only or rigth left
-            //
-
-            //we identify each subarea with the top-left coordinate and the side of length 10 points
-
-            //we consider at the start the full swarm to be charged and ready
             redisReply* reply;
             for (int i = 0; i < 30; i++)
             {
                 for (int j = 0; j < 30; j++)
                 {
-                    //send message to drone this->drones[i*subareasy + subareax] with coord (i,j), sp and sd
 
                     // job_msg  e.g. y 80 x 50 spy 90 spx 60 sdx -1 (left)
                     // also add all of this in a job struct to be associated with the drone obj
@@ -540,8 +492,7 @@ void cc::tick()
                         job->nx,
                         job->dx, // Direzione X
                         job->dy
-                        ); //job.msg() returns the formated job in a string-type in order to send it via stream
-                    //dumpReply(reply,0);
+                        );
                     validate_reply_type(c, reply, REDIS_REPLY_STRING);
 
                     freeReplyObject(reply);
@@ -551,7 +502,7 @@ void cc::tick()
                 }
             }
 
-            if (DEBUG) printf("changing to running in 3sec\n");
+            if (DEBUG) printf("RUNNING\n");
             this->status = RUNNING;
             break;
         }

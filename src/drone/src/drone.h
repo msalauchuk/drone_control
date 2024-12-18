@@ -82,7 +82,7 @@ class DroneFleet {
     private:
         int pid;
         redisContext * c; 
-        const char * sync_stream = "sync_stream2";
+        const char * sync_stream = "time_sync";
         const char * drone_stream = "drone_stream";
         const char * log_stream = "log_stream";
 
