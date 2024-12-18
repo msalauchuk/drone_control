@@ -18,13 +18,13 @@ drone::drone(int did)
     last_t_v = -1;
 }
 
-void Swarm::addDrone(drone drone)
+void DroneFleet::addDrone(drone drone)
 {
     // Aggiunge un drone al centro di controllo
     drones.push_back(drone);
 }
 
-void Swarm::init_drones(int n)
+void DroneFleet::init_drones(int n)
 {
     for (int i = 0; i < n; i++)
     {
@@ -33,7 +33,7 @@ void Swarm::init_drones(int n)
     }
 }
 
-void Swarm::await_sync()
+void DroneFleet::sync_with_control_center()
 {
     redisReply* reply;
 
@@ -58,7 +58,7 @@ void Swarm::await_sync()
 
 // Initialize 1000 drones
 // Each drone starts at CC (3000,3000) with 100% battery
-void Swarm::init()
+void DroneFleet::init()
 {
     //set up redis context
     this->pid = getpid();
@@ -104,7 +104,7 @@ void Swarm::init()
     }
 }
 
-Job* get_job_from_reply(redisReply* reply)
+Job* parse_job_from_reply(redisReply* reply)
 {
     //low_battery msgtype e.g. type low_battery did 123 cy 0 cx 0 nexty 40 nextx 65 dirx -1 diry -1
     char say[8],sax[8],ny[8],nx[8],dx[8], dy[8];
@@ -131,7 +131,7 @@ Job* get_job_from_reply(redisReply* reply)
 
 
 // charging time between 2-3 hours
-double get_random_charge_time()
+double calculate_random_charge_time()
 {
     // Generate a random number between min and max
     double min = 2 * 60 * 60; //2h
@@ -142,12 +142,12 @@ double get_random_charge_time()
 }
 
 // Calculate Euclidean distance from drone to control center sqrt(dx² + dy²)
-double drone::get_distance_control_center()
+double drone::calculate_distance_to_base()
 {
     return sqrt(pow(x - CC_X, 2) + pow(y - CC_Y, 2));
 }
 
-bool drone::is_charged()
+bool drone::is_fully_charged()
 {
     return charge_time <= 0;
 }
@@ -157,12 +157,12 @@ void drone::charge()
     charge_time -= T; // Decrements by timestep T
 }
 
-bool drone::is_home()
+bool drone::is_at_base()
 {
     return x == CC_X && y == CC_Y;
 }
 
-bool drone::at_range_limit()
+bool drone::has_reached_range_limit()
 {
     return distanceToCC <= 0;
 }
@@ -177,15 +177,15 @@ double drone::get_autonomy()
 bool drone::is_low_battery()
 {
     // Need enough battery for round trip to control center plus safety margin
-    return get_autonomy() <= (get_distance_control_center() * 2) + MARGIN;
+    return get_autonomy() <= (calculate_distance_to_base() * 2) + MARGIN;
 }
 
 void drone::set_last_dist()
 {
-    distanceToCC = get_distance_control_center();
+    distanceToCC = calculate_distance_to_base();
 }
 
-void drone::send_replace_drone_msg(redisContext* c)
+void drone::request_drone_replacement(redisContext* c)
 {
 
     //subarea is 200m × 200m
@@ -306,12 +306,12 @@ void drone::calc_velocity(double targetX, double targetY)
     double totalDistanceToTarget = sqrt(distanceToTargetX * distanceToTargetX + distanceToTargetY * distanceToTargetY);
 
 
-    //Determine movement speed for this tick
+    //Determine movement speed for this update_position
     // Use smaller of maximum speed or distance to target
-    // speed = 20m per tick (from constructor: speed = (30.0 / 3.6) * T)
+    // speed = 20m per update_position (from constructor: speed = (30.0 / 3.6) * T)
 
-    // If target is closer than 20m, move exactly that distance
-    // Otherwise move maximum 20m
+    // If target is closer than 20m, update_position exactly that distance
+    // Otherwise update_position maximum 20m
     double movementSpeed = (speed >= totalDistanceToTarget) ? totalDistanceToTarget : speed;
 
     if (totalDistanceToTarget <= 0)
@@ -329,7 +329,7 @@ void drone::calc_velocity(double targetX, double targetY)
     vely = movementSpeed * directionY;
 }
 
-void reset_job(Job* job)
+void reset_patrol_pattern(Job* job)
 {
     int subarea_side = GRID_SIZE * 10;
     int offset = 10;
@@ -366,7 +366,7 @@ void reset_job(Job* job)
 }
 
 // Main movement function implementing different flight patterns
-void drone::move(int t)
+void drone::update_position(int t)
 {
     // Decrease battery based on time step
     this->battery -= (100.0 / (1800.0 / T));
@@ -407,11 +407,11 @@ void drone::move(int t)
     case HANDOVER_SCAN:
     case COVERAGE_PATTERN:
 
-        // Calculate step for one tick in lawn-mower pattern
+        // Calculate step for one update_position in lawn-mower pattern
         double move_distance;
         if (job->dx == -1) // left
         {
-            // Calculate distance to left edge or use standard tick distance
+            // Calculate distance to left edge or use standard update_position distance
             double distanceToLeftEdge = x - (job->sax + 10);
             move_distance = (speed >= distanceToLeftEdge) ? distanceToLeftEdge : speed;
 
@@ -448,7 +448,7 @@ void drone::move(int t)
             // Check if subarea is complete, moved beyond subarea boundaries
             if (job->ny < job->say || job->ny > job->say + 200)
             {
-                reset_job(this->job);
+                reset_patrol_pattern(this->job);
 
                 if (status != HANDOVER_MODE)
                     f_status = PATTERN_RESET;
@@ -500,7 +500,7 @@ void drone::tick(redisContext* c, int t)
                 break;
             }
 
-            this->job = get_job_from_reply(reply);
+            this->job = parse_job_from_reply(reply);
 
             //printf("************job nx: %d, ny : %d, sax : %d, say : %d\n", job->nx, job->ny, job->sax, job->say);
 
@@ -527,7 +527,7 @@ void drone::tick(redisContext* c, int t)
                 // calculate last poss for this drone
                 // calc next poss for the next drone (should be cur_pos + d_control_cent ofc applied on the grid)
                 this->set_last_dist(); // Calculate remaining distance
-                this->send_replace_drone_msg(c); // Request replacement
+                this->request_drone_replacement(c); // Request replacement
 
                 // Transition to waiting state
                 status = HANDOVER_MODE;
@@ -535,7 +535,7 @@ void drone::tick(redisContext* c, int t)
                 break;
             }
             // Continue normal movement pattern
-            this->move(t);
+            this->update_position(t);
 
             break;
         }
@@ -546,7 +546,7 @@ void drone::tick(redisContext* c, int t)
 
 
 
-            if (this->at_range_limit())
+            if (this->has_reached_range_limit())
             {
                 // If finished current segment, prepare to return home
                 this->job->nx = CC_X; // Set destination to control center
@@ -554,7 +554,7 @@ void drone::tick(redisContext* c, int t)
                 status = HOMING;
                 this->f_status = RETURN_TO_BASE;
             }
-            this->move(t); // Continue movement while waiting
+            this->update_position(t); // Continue movement while waiting
             // vai alla pos lastx lasty
             break;
         }
@@ -562,16 +562,16 @@ void drone::tick(redisContext* c, int t)
 
         // Returning to control center
         {
-            if (this->is_home())
+            if (this->is_at_base())
             {
                 // When reached control center, begin charging
                 status = CHARGING;
-                this->charge_time = get_random_charge_time();
+                this->charge_time = calculate_random_charge_time();
                 //printf("charging for : %f\n",charge_time);
                 free(this->job); // Clean up completed job
                 break;
             }
-            this->move(t); // Continue movement toward home
+            this->update_position(t); // Continue movement toward home
             break;
         }
     case CHARGING:
@@ -579,7 +579,7 @@ void drone::tick(redisContext* c, int t)
         // Recharging at control center
         {
             this->charge(); // Decrease remaining charge time
-            if (this->is_charged())
+            if (this->is_fully_charged())
             {
                 // When fully charged, return to idle state
                 status = READY;
@@ -600,7 +600,7 @@ void drone::tick(redisContext* c, int t)
     }
 }
 
-void Swarm::tick(int t)
+void DroneFleet::update_position(int t)
 {
     // At each time step, update the state of all drones in the swarm
     for (int i = 0; i < DRONES_COUNT; i++)
@@ -609,12 +609,12 @@ void Swarm::tick(int t)
         //   printf(">>>>> say %d, sax %d, dx %d, dy %d\nny : %d, nx %d\n",drones[i].job->say,drones[i].job->sax,drones[i].job->dx,drones[i].job->dy,drones[i].job->ny,drones[i].job->nx);
         //printf("y : %lf, x : %lf\n",drones[i].y, drones[i].x);
 
-        // Execute state machine tick for each drone
+        // Execute state machine update_position for each drone
         drones[i].tick(c, t);
     }
 }
 
-void Swarm::log()
+void DroneFleet::log()
 {
     redisReply* reply;
     for (int i = 0; i < DRONES_COUNT; i++)
@@ -631,7 +631,7 @@ void Swarm::log()
     }
 }
 
-void Swarm::shutdown()
+void DroneFleet::shutdown()
 {
     for (int i = 0; i < DRONES_COUNT; i++)
     {
