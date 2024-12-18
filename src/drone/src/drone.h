@@ -9,7 +9,7 @@
 #include <cmath>
 #include <unistd.h>
 #include "config.h"
-#include "con2redis.h"
+#include "src/redis/src/con2redis.h"
 
 typedef struct {
     int sax; //subarea x 

@@ -21,36 +21,36 @@ link_directories(${HIREDIS_ROOT}/lib)
 
 # Common include directories
 include_directories(
-        ${CMAKE_SOURCE_DIR}/redis/src
-        ${CMAKE_SOURCE_DIR}/control_center/src
-        ${CMAKE_SOURCE_DIR}/drone/src
+        ${CMAKE_SOURCE_DIR}src/redis/src
+        ${CMAKE_SOURCE_DIR}src/control_center/src
+        ${CMAKE_SOURCE_DIR}src/drone/src
         ${CMAKE_SOURCE_DIR}
 )
 
 # Common library sources
 add_library(common_lib
-        redis/src/readreply.cpp
-        redis/src/redisfun.cpp
-        redis/src/local.h
-        redis/src/con2redis.h
+        src/redis/src/readreply.cpp
+        src/redis/src/redisfun.cpp
+        src/redis/src/local.h
+        src/redis/src/con2redis.h
 
 )
 
 # Control Center executable
 add_executable(control_center
-        control_center/src/cc.cpp
-        control_center/src/main.cpp
-        control_center/src/config.h
-        control_center/src/cc.h
+        src/control_center/src/cc.cpp
+        src/control_center/src/main.cpp
+        src/control_center/src/config.h
+        src/control_center/src/cc.h
 
 )
 
 # Drone executable
 add_executable(drone
-        drone/src/Drone.cpp
-        drone/src/main.cpp
-        drone/src/config.h
-        drone/src/Drone.h
+        src/drone/src/Drone.cpp
+        src/drone/src/main.cpp
+        src/drone/src/config.h
+        src/drone/src/Drone.h
 )
 
 # Link common library and hiredis to both executables
