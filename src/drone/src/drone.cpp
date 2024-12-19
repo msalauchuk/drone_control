@@ -4,11 +4,10 @@
 
 
 
-drone::drone(int did)
-{
+drone::drone(int did){
     id = did;
     battery = 100,
-        x = CC_X;
+    x = CC_X;
     y = CC_Y;
     f_status = MOVING_TO_TARGET;
     speed = (30.0 / 3.6) * T;

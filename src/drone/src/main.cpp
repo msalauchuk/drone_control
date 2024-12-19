@@ -69,7 +69,7 @@ int main() {
         printf("Initialized %d drones successfully\n\n", DRONES_COUNT);
 
         // Main simulation loop
-        for (int time_step = 0; time_step < HORIZON; time_step++) {
+        for (int time_step = 0; time_step < TOTAL_SIMULATION_TIME; time_step++) {
             if (shutdown_in_progress) {
                 break;  // Exit loop if shutdown started
             }

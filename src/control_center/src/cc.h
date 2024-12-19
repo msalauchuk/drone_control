@@ -36,7 +36,7 @@ typedef struct
 void get_job_msg(const Job* my_job, char* buffer);
 Job* create_job(int sax, int say, int ny, int nx, int dx, int dy);
 
-enum drone_status
+enum DRONE_STATUS
 {
     IDLE_D,
     FLYING_D,
@@ -47,11 +47,7 @@ enum drone_status
 
 class drone
 {
-private:
-    // pos x will be t.c. (x -10) congruo 0 mod 20
-
 public:
-    // Costruttore
     drone(int did)
     {
         this->id = did;
@@ -65,7 +61,7 @@ public:
     int last_verified_x; // last verified pos
     double battery; // Livello della batteria del drone
     int id;
-    drone_status status; // Stato del drone
+    DRONE_STATUS status; // Stato del drone
     Job* job;
 };
 
@@ -79,7 +75,6 @@ enum Status
 
 class cc
 {
-private:
     int pid;
     std::vector<drone> drones; // vector of drones ids, make another drone class
     std::vector<Job*> job_queue;
@@ -113,12 +108,7 @@ public:
 
     // sub areas must be of a max of 250 points - or if sqrt(250) = l, lxl -1 //
     bool check_area(int t);
-    // checks whether a point has been verified in the last 5 min, if not logs functional requisite has been violeted - checks every point on the grid
-
-
-    // ...
 };
 
-//need a dummy drone class
 
 #endif // CONTROL_CENTER_H

@@ -3,7 +3,7 @@
 
 // Simulation Parameters
 
-#define HORIZON 35540 // Total simulation duration in seconds (approximately 9.87 hours)
+#define TOTAL_SIMULATION_TIME 35540 // Total simulation duration in seconds (approximately 9.87 hours)
 #define T 2.4               // Time step in seconds
 #define DEBUG 1             // Debug mode flag
 

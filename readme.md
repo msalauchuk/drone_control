@@ -56,8 +56,10 @@ In another terminal, run the drone simulation:
 To visualize the coverage results:
 
 ```bash
-cd test
-python plotter.py
+
+pip install pandas matplotlib seaborn
+
+python plotter.py test/system.csv
 ```
 
 ## Troubleshooting

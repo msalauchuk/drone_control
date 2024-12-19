@@ -32,8 +32,8 @@ int main(int argc, char* argv[])
     cc.init();
     print_parameters(); //print parameters to stdoutput for readability
 
-    //Itera per ogni timestep fino a HORIZON
-    for (int timeStep = 0; timeStep < HORIZON; timeStep++)
+    //Itera per ogni timestep fino a TOTAL_SIMULATION_TIME
+    for (int timeStep = 0; timeStep < TOTAL_SIMULATION_TIME; timeStep++)
     {
         printf("______________________\nt =  %d\n\n", timeStep);
 

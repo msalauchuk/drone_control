@@ -9,7 +9,7 @@ void cc::print_status()
 
 void print_parameters()
 {
-    printf("Horizon : %d\nDrones count: %d\n", HORIZON,DRONES_COUNT);
+    printf("Horizon : %d\nDrones count: %d\n", TOTAL_SIMULATION_TIME,DRONES_COUNT);
 }
 
 // Implementazione dei metodi della classe cc

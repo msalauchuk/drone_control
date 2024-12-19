@@ -11,8 +11,30 @@
 #include "src/common/system_config.h"
 #include "src/redis/src/connector.h"
 
+
+
+enum FLIGHT_STATUS {
+    MOVING_TO_TARGET, //  to target (center of grid point)
+    COVERAGE_PATTERN, // lawn mowner pattern
+    HANDOVER_SCAN,
+    RETURN_TO_BASE,
+    PATTERN_RESET
+};
+
+
+// Each drone goes through these states:
+enum DRONE_STATUS{
+    STARTUP, // Receives job from Redis with subarea assignment
+    READY, // Ready for new job
+    ON_MISSION, //arrive at start pos
+    HANDOVER_MODE, // flying to the last pos while other drone arrives
+    HOMING, // Return to CC
+    CHARGING
+};
+
+
 typedef struct {
-    int sax; //subarea x 
+    int sax; //subarea x
     int say; //subarea y
     int ny;  // // First target x (center of first cell)
     int nx;  //
@@ -23,33 +45,11 @@ double calculate_random_charge_time();
 void reset_patrol_pattern(Job * job);
 Job * parse_job_from_reply(redisReply * reply);
 
-
-enum flying_status {
-    MOVING_TO_TARGET, //  to target (center of grid point)
-    COVERAGE_PATTERN, // lawn mowner pattern
-    HANDOVER_SCAN,
-    RETURN_TO_BASE,
-    PATTERN_RESET
-};
-
-
-// Each drone goes through these states:
-enum drone_status{
-    STARTUP, // Receives job from Redis with subarea assignment
-    READY, // Ready for new job
-    ON_MISSION, //arrive at start pos
-    HANDOVER_MODE, // flying to the last pos while other drone arrives
-    HOMING, // Return to CC
-    CHARGING
-};
 class drone {
-private:
-    // Attributi privati della classe drone
     double velx;
     double vely;
     double speed; //// 30 km/h to m/s * 2.4s = 20m per update_position
     double charge_time;
-    // the drone can never be at distance autonomy left 'd' away from its distance from the center 'c'.  if d>=c then the drone needs to go back to charge
 
 public:
     int last_v_x ;
@@ -58,12 +58,12 @@ public:
     double distanceToCC; // only when waiting other drone
     double x;
     double y;
-    flying_status f_status;
+    FLIGHT_STATUS f_status;
     double battery;// 1800s = 30 minutes total flight time (100.0 / (1800.0 / T)
-    drone_status status;
-    int id; // Identificativo unico del drone
+    DRONE_STATUS status;
+    int id;
     Job * job;
-    // Costruttore e metodi pubblici della classe drone
+
     drone(int id);
     void tick(redisContext *c,int t);
     double calculate_distance_to_base();
@@ -79,7 +79,6 @@ public:
     void update_position(int t);
 };
 class DroneFleet {
-    private:
         int pid;
         redisContext * c; 
         const char * sync_stream = "time_sync";
