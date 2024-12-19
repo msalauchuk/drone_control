@@ -66,7 +66,7 @@ public:
 
     drone(int id);
     void validate_initial_state() const;
-    void tick(redisContext *c,int t);
+    void update_state(redisContext *c,int t);
     double calculate_distance_to_base();
     bool is_fully_charged();
     void charge();
@@ -94,7 +94,7 @@ class DroneFleet {
         void addDrone(drone drone);
         void init_drones(int n); // initializes the drones
         void sync_with_control_center(); //sync time w/ redis
-        void update_position(int t); // time update_position
+        void update_fleet_position(int t); // time update_position
         void log(); // logs
         void shutdown();// close connections
 };

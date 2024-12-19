@@ -79,7 +79,7 @@ int main() {
             printf("=========================\n\n");
 
             fleet.sync_with_control_center();
-            fleet.update_position(time_step);
+            fleet.update_fleet_position(time_step);
             fleet.log();
         }
 

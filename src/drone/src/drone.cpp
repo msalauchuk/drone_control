@@ -485,7 +485,7 @@ void drone::update_position(int t)
     }
 }
 
-void drone::tick(redisContext* c, int t)
+void drone::update_state(redisContext* c, int t)
 {
     redisReply* reply;
     switch (this->status)
@@ -626,7 +626,7 @@ void drone::tick(redisContext* c, int t)
     }
 }
 
-void DroneFleet::update_position(int t)
+void DroneFleet::update_fleet_position(int t)
 {
     // At each time step, update the state of all drones in the swarm
     for (int i = 0; i < DRONES_COUNT; i++)
@@ -636,7 +636,7 @@ void DroneFleet::update_position(int t)
         //printf("y : %lf, x : %lf\n",drones[i].y, drones[i].x);
 
         // Execute state machine update_position for each drone
-        drones[i].tick(c, t);
+        drones[i].update_state(c, t);
     }
 }
 
