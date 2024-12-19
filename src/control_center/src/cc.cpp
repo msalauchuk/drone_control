@@ -11,6 +11,7 @@ area_verified(0),
 c(nullptr)
 {
     initialize_grid();
+    init_redis();
 }
 
 

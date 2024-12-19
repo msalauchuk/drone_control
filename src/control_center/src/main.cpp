@@ -29,7 +29,6 @@ int main(int argc, char* argv[])
 {
     // defining the cc
     cc cc;
-    cc.init_redis();
     print_simulation_configuration(); //print parameters to stdoutput for readability
 
     //Itera per ogni timestep fino a TOTAL_SIMULATION_TIME
