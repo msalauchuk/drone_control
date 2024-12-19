@@ -2,34 +2,10 @@
 #include "../../redis/src/connector.h"
 #include <vector>
 
-void cc::print_status()
-{
-    printf("status : %d\n", status);
-}
 
-void print_parameters()
-{
-    printf("Horizon : %d\nDrones count: %d\n", TOTAL_SIMULATION_TIME,DRONES_COUNT);
-}
 
-// Implementazione dei metodi della classe cc
-cc::cc()
-{
-    /* Costruttore */
-}
+cc::cc(){}
 
-const char* int_to_string(int x)
-{
-    return std::to_string(x).c_str();
-}
-
-redisReply* read_stream(redisContext* c, const char* stream_name)
-{
-    // Read from the stream starting from the beginning
-    redisReply* reply = (redisReply*)redisCommand(c, "XREAD STREAMS %s 0", stream_name);
-    validate_reply(c, reply);
-    return reply;
-}
 
 void cc::addDrone(drone drone)
 {
@@ -37,22 +13,16 @@ void cc::addDrone(drone drone)
     drones.push_back(drone);
 }
 
-void cc::init_grid()
+void cc::initialize_grid()
 {
-    for (int i = 0; i < HEIGHT; i++)
-    {
-        for (int j = 0; j < WIDTH; j++)
-        {
-            grid[i][j] = -1;
-        }
-    }
+    std::fill(&grid[0][0], &grid[0][0] + WIDTH * HEIGHT, -1);
 }
 
 void cc::init()
 {
     /* FASE 1: INIZIALIZZAZIONE VARIABILI BASE */
     this-> pid = getpid();
-    init_grid();
+    initialize_grid();
     // Configurazione connessione Redis
     const char* hostname = "127.0.0.1"; // localhost
     int port = 6379; //  default port
@@ -778,3 +748,20 @@ void cc::shutdown()
 
     redisFree(this->c);
 }
+
+void cc::print_status() const
+{
+    printf("Control Center Status: %d\n", status);
+}
+
+void print_simulation_configuration()
+{
+    printf("Simulation Duration (seconds): %d\n", TOTAL_SIMULATION_TIME);
+    printf("Number of Drones: %d\n", DRONES_COUNT);
+}
+const char* int_to_string(int x)
+{
+    return std::to_string(x).c_str();
+}
+
+

@@ -89,11 +89,11 @@ public:
     void init();
     void sync_and_wait();
     void process_simulation_step();
-    void init_grid();
+    void initialize_grid();
 
     double calculate_verified_percentage(int curr_time);
     void dumpsubarea(int curr);
-    void print_status();
+    void print_status() const;
     void handle_msg(const char* type, redisReply* reply);
     void log_event(int time);
     void shutdown();
@@ -109,7 +109,7 @@ public:
 };
 
 void save_to_csv(bool verified_area, int t, std::string filename);
-void print_parameters();
+void print_simulation_configuration();
 bool verified_single_point(int last_v, int current_time); // checks single point
 const char* int_to_string(int x);
 
