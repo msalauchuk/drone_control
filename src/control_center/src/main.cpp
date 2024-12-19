@@ -48,14 +48,14 @@ int main(int argc, char* argv[])
         // - Aggiorna lo stato dei droni
         // - Calcola nuove istruzioni
         // - Gestisce ricariche e movimenti
-        cc.tick(); // performs the action in a given istant of time t based on current status
+        cc.process_simulation_step(); // performs the action in a given istant of time t based on current status
 
 
         // Registra lo stato del sistema e monitora le proprietà:
         // - Salva i dati di stato
         // - Verifica proprietà funzionali
         // - Controlla metriche non funzionali
-        cc.log(timeStep); // logs data + monitors
+        cc.log_event(timeStep); // logs data + monitors
     }
 
     // Stampa messaggio di completamento se in modalità debug

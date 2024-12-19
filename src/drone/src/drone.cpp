@@ -6,7 +6,7 @@
 
 drone::drone(int did){
     id = did;
-    battery = 100,
+    battery_lvl = 100,
     x = CC_X;
     y = CC_Y;
     f_status = MOVING_TO_TARGET;
@@ -56,7 +56,7 @@ void DroneFleet::sync_with_control_center()
 
 
 // Initialize 1000 drones
-// Each drone starts at CC (3000,3000) with 100% battery
+// Each drone starts at CC (3000,3000) with 100% battery_lvl
 void DroneFleet::init()
 {
     //set up redis context
@@ -166,16 +166,16 @@ bool drone::has_reached_range_limit()
     return distanceToCC <= 0;
 }
 
-// Calculate remaining flight range based on battery percentage
+// Calculate remaining flight range based on battery_lvl percentage
 double drone::get_autonomy()
 {
-    return (battery / 100.0) * MAX_DISTANCE;
+    return (battery_lvl / 100.0) * MAX_DISTANCE;
 }
 
 // Check if drone needs to return for charging
 bool drone::is_low_battery()
 {
-    // Need enough battery for round trip to control center plus safety margin
+    // Need enough battery_lvl for round trip to control center plus safety margin
     return get_autonomy() <= (calculate_distance_to_base() * 2) + MARGIN;
 }
 
@@ -367,8 +367,8 @@ void reset_patrol_pattern(Job* job)
 // Main movement function implementing different flight patterns
 void drone::update_position(int t)
 {
-    // Decrease battery based on time step
-    this->battery -= (100.0 / (1800.0 / T));
+    // Decrease battery_lvl based on time step
+    this->battery_lvl -= (100.0 / (1800.0 / T));
 
     // Update distance remaining if waiting for replacement
     if (status == HANDOVER_MODE)
@@ -518,7 +518,7 @@ void drone::tick(redisContext* c, int t)
             // if arrived calc next using lawn mowner algo
 
 
-            // Check if battery is getting too low to complete round trip
+            // Check if battery_lvl is getting too low to complete round trip
             //if current_autonomy <= d_control center x2 + 2margin (max dist :w
             //the drone can get while waiting other drone while keep moving)
             if (this->is_low_battery())
@@ -541,7 +541,7 @@ void drone::tick(redisContext* c, int t)
     case HANDOVER_MODE:
         {
 
-            // Waiting for replacement drone while continuing until safe battery range
+            // Waiting for replacement drone while continuing until safe battery_lvl range
 
 
 
@@ -582,7 +582,7 @@ void drone::tick(redisContext* c, int t)
             {
                 // When fully charged, return to idle state
                 status = READY;
-                this->battery = 100.0;
+                this->battery_lvl = 100.0;
                 //printf("drone %d FULLY CHARGED\n",id);
 
                 const char* stream_name = "drone_stream";
@@ -604,7 +604,7 @@ void DroneFleet::update_position(int t)
     // At each time step, update the state of all drones in the swarm
     for (int i = 0; i < DRONES_COUNT; i++)
     {
-        //    printf("+++++++++++++\ndrone : %d, x: %f , y %f, status : %d, f_status : %d, battery : %f, distanceToCC : %f\n",drones[i].id, drones[i].x, drones[i].y, drones[i].status, drones[i].f_status, drones[i].battery,drones[i].distanceToCC);
+        //    printf("+++++++++++++\ndrone : %d, x: %f , y %f, status : %d, f_status : %d, battery_lvl : %f, distanceToCC : %f\n",drones[i].id, drones[i].x, drones[i].y, drones[i].status, drones[i].f_status, drones[i].battery_lvl,drones[i].distanceToCC);
         //   printf(">>>>> say %d, sax %d, dx %d, dy %d\nny : %d, nx %d\n",drones[i].job->say,drones[i].job->sax,drones[i].job->dx,drones[i].job->dy,drones[i].job->ny,drones[i].job->nx);
         //printf("y : %lf, x : %lf\n",drones[i].y, drones[i].x);
 
@@ -622,8 +622,8 @@ void DroneFleet::log()
         {
             continue;
         }
-        reply = RedisCommand(c, "XADD %s * did %d battery %f lvy %d lvx %d tv %d status %d"
-                                          , log_stream, i, drones[i].battery, drones[i].last_v_y, drones[i].last_v_x
+        reply = RedisCommand(c, "XADD %s * did %d battery_lvl %f lvy %d lvx %d tv %d status %d"
+                                          , log_stream, i, drones[i].battery_lvl, drones[i].last_v_y, drones[i].last_v_x
                                           , drones[i].last_t_v, drones[i].status);
         validate_reply(c, reply);
         freeReplyObject(reply);

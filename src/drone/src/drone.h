@@ -59,7 +59,7 @@ public:
     double x;
     double y;
     FLIGHT_STATUS f_status;
-    double battery;// 1800s = 30 minutes total flight time (100.0 / (1800.0 / T)
+    double battery_lvl;// 1800s = 30 minutes total flight time (100.0 / (1800.0 / T)
     DRONE_STATUS status;
     int id;
     Job * job;

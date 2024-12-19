@@ -107,7 +107,7 @@ void cc::init()
     stream_initialize_group(c, drone_stream);
     freeReplyObject(reply);
 
-    //log stream
+    //log_event stream
     reply = (redisReply*)redisCommand(c, "DEL %s", log_stream);
     validate_reply_type(c, reply, REDIS_REPLY_INTEGER);
     stream_initialize_group(c, log_stream);
@@ -135,7 +135,7 @@ void cc::init()
 
 int cc::get_available_drone_id()
 {
-    auto is_available = [](drone drone) { return (drone.status == IDLE_D); };
+    auto is_available = [](drone drone) { return (drone.status == startup); };
     auto drone = std::find_if(drones.begin(), drones.end(), is_available);
     if (drone != drones.end())
     {
@@ -193,9 +193,8 @@ void cc::sync_and_wait()
     freeReplyObject(reply);
 }
 
-void get_job_msg(Job* my_job, char* buffer)
+void serialize_job_msg(Job* my_job, char* buffer)
 {
-    //TODO remove hardcoded 50
     snprintf(buffer, 50, "sax %d say %d ny %d nx %d dx %d dy %d",
              my_job->sax, my_job->say, my_job->ny, my_job->nx, my_job->dx, my_job->dy);
 }
@@ -270,7 +269,7 @@ Job* create_job(int say, int sax, int ny, int nx, int dx, int dy)
     return new_job;
 }
 
-void cc::send_substitute(int new_drone_id)
+void cc::send_substitute_drone(int new_drone_id)
 {
     redisReply* rep;
     Job* job = job_queue.back();
@@ -281,7 +280,7 @@ void cc::send_substitute(int new_drone_id)
     job_queue.pop_back();
     freeReplyObject(rep);
     this->drones[new_drone_id].job = job;  // Assign job to new drone
-    this->drones[new_drone_id].status = FLYING_D;
+    this->drones[new_drone_id].status = onMission;
 }
 
 /**
@@ -363,7 +362,7 @@ void cc::handle_msg(const char* type, redisReply* reply)
 
                 // Libera il job del drone con batteria scarica e lo manda a ricaricare
                 free(this->drones[std::stoi(did)].job);
-                this->drones[std::stoi(did)].status = HOMING_D;
+                this->drones[std::stoi(did)].status = homing;
                 return;
             }
 
@@ -379,11 +378,11 @@ void cc::handle_msg(const char* type, redisReply* reply)
             // Aggiorna lo stato dei droni
             // Assegna il job al nuovo drone e lo mette in volo
             this->drones[new_drone_id].job = job;
-            this->drones[new_drone_id].status = FLYING_D;
+            this->drones[new_drone_id].status = onMission;
 
             // Libera il job del drone scarico e lo manda a ricaricare
             free(this->drones[std::stoi(did)].job);
-            this->drones[std::stoi(did)].status = HOMING_D;
+            this->drones[std::stoi(did)].status = homing;
             // change lowe_battery_id status to homing
             break;
         }
@@ -393,7 +392,7 @@ void cc::handle_msg(const char* type, redisReply* reply)
             // Formato messaggio: type charging did 123
             char did[4];
             get_stream_message_field_value(reply, 0, 0, 3, did);
-            this->drones[atoi(did)].status = CHARGING_D;
+            this->drones[atoi(did)].status = charging;
 
             // change is status to charging
         }
@@ -405,14 +404,14 @@ void cc::handle_msg(const char* type, redisReply* reply)
             // Formato messaggio: type recharged did 123
             char did[4];
             get_stream_message_field_value(reply, 0, 0, 3, did);
-            this->drones[atoi(did)].status = IDLE_D;
+            this->drones[atoi(did)].status = startup;
             // change id status to IDLE
             break;
         }
     }
 }
 
-void cc::tick()
+void cc::process_simulation_step()
 {
     switch (status)
     {
@@ -498,7 +497,7 @@ void cc::tick()
                     freeReplyObject(reply);
                     // change drone status to running
                     this->drones[i * SUB_AREAS_H + j].job = job; // Assegna job al drone
-                    this->drones[i * SUB_AREAS_H + j].status = FLYING_D; // Imposta stato a "in volo"
+                    this->drones[i * SUB_AREAS_H + j].status = onMission; // Imposta stato a "in volo"
                 }
             }
 
@@ -551,7 +550,7 @@ void cc::tick()
                 int new_drone = get_available_drone_id();
                 if (new_drone != -1)
                 {
-                    send_substitute(new_drone);
+                    send_substitute_drone(new_drone);
                 }
             }
 
@@ -564,7 +563,7 @@ void cc::tick()
     }
 }
 
-bool is_verified(int last_v, int current_time)
+bool verified_single_point(int last_v, int current_time)
 {
     // - true se il punto è stato verificato negli ultimi 5 minuti (300 secondi)
     // - false se il punto non è mai stato verificato o se la verifica è troppo vecchia
@@ -589,14 +588,14 @@ void cc::dumpsubarea(int cur)
 
 // Calcola la percentuale di area totale che è stata verificata correttamente
 
-double cc::get_percentage(int curr_time)
+double cc::calculate_verified_percentage(int curr_time)
 {
     int aa = 0; // Contatore dei punti verificati correttamente
     for (int i = 0; i < HEIGHT; i++)
     {
         for (int j = 0; j < WIDTH; j++)
         {
-            if (!is_verified(grid[i][j], curr_time))
+            if (!verified_single_point(grid[i][j], curr_time))
             {
                 //dumpsubarea(curr_time);
                 continue;
@@ -613,14 +612,14 @@ double cc::get_percentage(int curr_time)
 
 
 // Verifica se l'area totale ha raggiunto la soglia minima di copertura (99%)
-bool cc::check_area(int curr_time)
+bool cc::verify_area(int curr_time)
 {
     int aa = 0;
     for (int i = 0; i < HEIGHT; i++)
     {
         for (int j = 0; j < WIDTH; j++)
         {
-            if (!is_verified(grid[i][j], curr_time))
+            if (!verified_single_point(grid[i][j], curr_time))
             {
                 //dumpsubarea(curr_time);
                 continue;
@@ -648,7 +647,7 @@ void save_to_csv(double va, int t, std::string filename)
     }
 }
 
-void cc::log(int time)
+void cc::log_event(int time)
 
 {
 
@@ -656,7 +655,7 @@ void cc::log(int time)
     // Skip se non in stato RUNNING
     if (!(status == RUNNING))
     {
-        printf("Skipping log - not in RUNNING state\n");
+        printf("Skipping log_event - not in RUNNING state\n");
         return;
     }
 
@@ -666,7 +665,7 @@ void cc::log(int time)
     static int last_log_count = 0;
 
 
-    //drone log e.g. did 123 battery 89 lvy 30 lvx 90 tv 340 status 0
+    //drone log_event e.g. did 123 battery_lvl 89 lvy 30 lvx 90 tv 340 status 0
     for (int i = 0; i < DRONES_COUNT; i++)
     {
 
@@ -686,7 +685,7 @@ void cc::log(int time)
 
         //create job using next coord. and subarea coord.
 
-        // Estrae informazioni dal messaggio di log
+        // Estrae informazioni dal messaggio di log_event
 
         get_stream_message_field_value(reply, 0, 0, 1, drone_id);
         get_stream_message_field_value(reply, 0, 0, 3, bat);
@@ -707,10 +706,10 @@ void cc::log(int time)
         int ilvy = std::stoi(lvy);
         ilvx = ilvx / 20;
         ilvy = ilvy / 20;
-        drones[did].battery = std::stod(bat);
+        drones[did].battery_lvl = std::stod(bat);
 
         // MONITOR BATTERIA: Verifica che la batteria non scenda sotto il minimo
-        assert(drones[did].battery > MIN_BATTERY);
+        assert(drones[did].battery_lvl > MIN_BATTERY);
 
         // Aggiorna la griglia con le ultime verifiche
         int ltv = std::stoi(tv);
@@ -736,8 +735,8 @@ void cc::log(int time)
     //printf("%d drones\n",a);
     // MONITOR AREA: Verifica che l'area verificata non diminuisca
     bool area_verified1 = area_verified; //verfica allo stato precedente
-    area_verified = check_area(time);
-    save_to_csv(get_percentage(time), time,TEST_PATH);
+    area_verified = verify_area(time);
+    save_to_csv(calculate_verified_percentage(time), time,TEST_PATH);
     //dumpsubarea(time) ;
     //MONITOR AREA
     assert(area_verified1 ? area_verified: 1); // se l' area diventa verificata non deve mai smettere
@@ -751,7 +750,7 @@ void cc::log(int time)
 
     //after updating the drones array update the grid based on drone positions in the msg
 
-    // get monitors bool val on the data and log on csv file
+    // get monitors bool val on the data and log_event on csv file
 
     // use a csv file no need to use postgresql
 }

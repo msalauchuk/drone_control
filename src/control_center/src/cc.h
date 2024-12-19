@@ -18,10 +18,7 @@
 #include <iostream>
 #include <fstream>
 #include <hiredis/hiredis.h>
-void save_to_csv(bool verified_area, int t, std::string filename);
-void print_parameters();
-bool is_verified(int last_v, int current_time); // checks single point
-const char* int_to_string(int x);
+
 
 typedef struct
 {
@@ -33,35 +30,35 @@ typedef struct
     int dy;
 } Job;
 
-void get_job_msg(const Job* my_job, char* buffer);
+void serialize_job_msg(const Job* my_job, char* buffer);
 Job* create_job(int sax, int say, int ny, int nx, int dx, int dy);
 
 enum DRONE_STATUS
 {
-    IDLE_D,
-    FLYING_D,
-    HOMING_D,
-    CHARGING_D
+    startup,
+    onMission,
+    homing,
+    charging
 };
 
 
 class drone
 {
 public:
-    drone(int did)
+    explicit drone(int did)
     {
         this->id = did;
         last_verified_x = -1;
         last_verified_y = -1;
-        battery = 100.0;
-        status = IDLE_D;
+        battery_lvl = 100.0;
+        status = startup;
     }
 
-    int last_verified_y; // last verified post
-    int last_verified_x; // last verified pos
-    double battery; // Livello della batteria del drone
+    int last_verified_y; // last verified pos at t
+    int last_verified_x;
+    double battery_lvl;
     int id;
-    DRONE_STATUS status; // Stato del drone
+    DRONE_STATUS status;
     Job* job;
 };
 
@@ -89,26 +86,32 @@ class cc
 
 public:
     cc();
-    double get_percentage(int curr_time);
-    void send_substitute(int new_drone);
-    void dumpsubarea(int curr);
-    void init_grid();
-    void print_status();
-    void addDrone(drone drone);
     void init();
     void sync_and_wait();
-    void tick();
+    void process_simulation_step();
+    void init_grid();
+
+    double calculate_verified_percentage(int curr_time);
+    void dumpsubarea(int curr);
+    void print_status();
     void handle_msg(const char* type, redisReply* reply);
-    void log(int time);
+    void log_event(int time);
     void shutdown();
 
-    void create_subarea(); // divides the area current(600x600) in sub_areas to be assigned to the individual drones
-    void divide_tasks(); // assign the subareas to the available drones
-    int get_available_drone_id();
+    void send_substitute_drone(int new_drone);
+    void addDrone(drone drone);
 
-    // sub areas must be of a max of 250 points - or if sqrt(250) = l, lxl -1 //
-    bool check_area(int t);
+    int get_available_drone_id();
+    bool verify_area(int t);
+
+
+
 };
+
+void save_to_csv(bool verified_area, int t, std::string filename);
+void print_parameters();
+bool verified_single_point(int last_v, int current_time); // checks single point
+const char* int_to_string(int x);
 
 
 #endif // CONTROL_CENTER_H
