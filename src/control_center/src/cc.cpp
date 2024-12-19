@@ -4,7 +4,14 @@
 
 
 
-cc::cc(){}
+cc::cc():
+pid(getpid()),
+status(STARTUP),
+area_verified(0),
+c(nullptr)
+{
+    initialize_grid();
+}
 
 
 void cc::addDrone(drone drone)
@@ -18,21 +25,17 @@ void cc::initialize_grid()
     std::fill(&grid[0][0], &grid[0][0] + WIDTH * HEIGHT, -1);
 }
 
-void cc::init()
+void cc::init_redis()
 {
     /* FASE 1: INIZIALIZZAZIONE VARIABILI BASE */
-    this-> pid = getpid();
-    initialize_grid();
     // Configurazione connessione Redis
     const char* hostname = "127.0.0.1"; // localhost
     int port = 6379; //  default port
 
-    status = STARTUP;
-    area_verified = 0;
 
     /* FASE 2: CONNESSIONE A REDIS */
     // Tenta la connessione al server Redis
-    this->c = redisConnect(hostname, port);
+    c = redisConnect(hostname, port);
     if (c == NULL || c->err)
     {
         if (c)
@@ -230,7 +233,6 @@ Job* create_job(int say, int sax, int ny, int nx, int dx, int dy)
         }
         return new_job;
     }
-    // Se sono specificate le coordinate successive, usa quelle
     new_job->dx = dx;
     new_job->dy = dy;
     new_job->ny = ny;
@@ -297,9 +299,7 @@ void cc::handle_msg(const char* type, redisReply* reply)
     {
     case 0:
         {
-            // Gestisce la situazione di batteria scarica e assegna il task a un nuovo drone
-            // Formato messaggio: type low_battery did 123 cy 0 cx 0 nexty 40 nextx 65 dirx -1 diry 1
-            //low_battery msgtype e.g. type low_battery did 123 cy 0 cx 0 nexty 40 nextx 65 dirx -1
+
             char say[8];
             char sax[8];
             char ny[8];
@@ -308,8 +308,8 @@ void cc::handle_msg(const char* type, redisReply* reply)
             char dy[8];
             char did[8];
 
-            // Estrae i valori dal messaggio Redis
-            //create job using next coord. and subarea coord.
+            // Estrae i valori dal messaggio Redis e crea job per la subarea
+
             get_stream_message_field_value(reply, 0, 0, 3, did); // ID del drone con batteria scarica
             get_stream_message_field_value(reply, 0, 0, 5, say); // Coordinate correnti e successive
             get_stream_message_field_value(reply, 0, 0, 7, sax);
@@ -319,25 +319,19 @@ void cc::handle_msg(const char* type, redisReply* reply)
             get_stream_message_field_value(reply, 0, 0, 15, dy);
 
 
-            // Crea un nuovo job con le coordinate attuali e successive
             Job* job = create_job(std::stoi(say), std::stoi(sax), std::stoi(ny), std::stoi(nx), std::stoi(dx),
                                   std::stoi(dy));
 
-            // Cerca un drone disponibile per il task
             int new_drone_id = get_available_drone_id(); // returns the first free drone
             if (new_drone_id == -1)
             {
-                // Se non ci sono droni disponibili, mette il job in coda
                 job_queue.push_back(job);
 
-                // Libera il job del drone con batteria scarica e lo manda a ricaricare
                 free(this->drones[std::stoi(did)].job);
                 this->drones[std::stoi(did)].status = homing;
                 return;
             }
 
-            // Invia il task al nuovo drone tramite il suo stream dedicato
-            //printf(">>>>>>>>>sending %d drone\n",new_drone_id);
             redisReply* rep;
             rep = (redisReply*)redisCommand(c, "XADD %d * type %s did %d say %d sax %d ny %d nx %d dx %d dy %d"
                                             , new_drone_id, "task", new_drone_id, job->say,
@@ -345,37 +339,27 @@ void cc::handle_msg(const char* type, redisReply* reply)
                                             job->dy);
             validate_reply_type(c, rep, REDIS_REPLY_STRING);
 
-            // Aggiorna lo stato dei droni
-            // Assegna il job al nuovo drone e lo mette in volo
             this->drones[new_drone_id].job = job;
             this->drones[new_drone_id].status = onMission;
 
             // Libera il job del drone scarico e lo manda a ricaricare
             free(this->drones[std::stoi(did)].job);
             this->drones[std::stoi(did)].status = homing;
-            // change lowe_battery_id status to homing
             break;
         }
     case 1:
         {
-            // Gestisce l'inizio della ricarica di un drone
-            // Formato messaggio: type charging did 123
             char did[4];
             get_stream_message_field_value(reply, 0, 0, 3, did);
             this->drones[atoi(did)].status = charging;
-
-            // change is status to charging
         }
         break;
     case 2:
         {
 
-            // Gestisce il completamento della ricarica di un drone
-            // Formato messaggio: type recharged did 123
             char did[4];
             get_stream_message_field_value(reply, 0, 0, 3, did);
             this->drones[atoi(did)].status = startup;
-            // change id status to IDLE
             break;
         }
     }
@@ -390,8 +374,6 @@ void cc::process_simulation_step()
             //startup
             printf("startup\n");
             redisReply* reply;
-            //redisReply *msgs = reply->element[0];// reading from only one stream so [0]
-
             // get elements as droneid,
             char value[8];
             for (int i = 0; i < DRONES_COUNT; i++)
@@ -402,20 +384,15 @@ void cc::process_simulation_step()
                 }
 
                 // Wait for each drone to send registration message
-
                 reply = stream_read_message_blocking(c, "diameter", "cc", 10000, drone_stream);
-
                 // Blocks for up to 10 seconds waiting for message
-
-
                 validate_reply(this->c, reply);
                 if (reply->type != REDIS_REPLY_NIL && reply->elements > 0)
                 {
-                    // Message format expected: type wake did {drone_id}
                     get_stream_message_field_value(reply, 0, 0, 3, value); // Get 3rd element (drone_id)
-                    int drone_id = std::stoi(value); // Convert to integer
+                    int drone_id = std::stoi(value);
                     // Create and add new drone to control center (add drones to the array)
-                    this->addDrone(drone(drone_id)); // constructor with just the id init drone position at start
+                    this->addDrone(drone(drone_id));
                 }
                 freeReplyObject(reply);
             }
@@ -434,19 +411,11 @@ void cc::process_simulation_step()
                 for (int j = 0; j < 30; j++)
                 {
 
-                    // job_msg  e.g. y 80 x 50 spy 90 spx 60 sdx -1 (left)
-                    // also add all of this in a job struct to be associated with the drone obj
-
                     int did = i * SUB_AREAS_W + j; // ID del drone che gestirà questa subarea
 
                     const char* stream_n = int_to_string(did); //stream number associated with the drone
 
                     Job* job = create_job(i * 200, j * 200, -1, -1, -1, -1);
-                    // returns a job struct using the subarea coord. use -1 for default
-                    // i * 200: coordinata Y iniziale della subarea
-                    // j * 200: coordinata X iniziale della subarea
-                    // -1, -1, -1, -1: valori default per ny, nx, dx, dy
-
 
 
                     // invio job al drone
@@ -465,9 +434,9 @@ void cc::process_simulation_step()
                     validate_reply_type(c, reply, REDIS_REPLY_STRING);
 
                     freeReplyObject(reply);
-                    // change drone status to running
-                    this->drones[i * SUB_AREAS_H + j].job = job; // Assegna job al drone
-                    this->drones[i * SUB_AREAS_H + j].status = onMission; // Imposta stato a "in volo"
+                    // change drone status
+                    this->drones[i * SUB_AREAS_H + j].job = job;
+                    this->drones[i * SUB_AREAS_H + j].status = onMission;
                 }
             }
 
@@ -477,12 +446,6 @@ void cc::process_simulation_step()
         }
     case RUNNING:
         {
-            //running
-            //read messages
-
-            // once the cc is up and running, it only receives msgs and responds accordingly to each one
-
-            //read all msgs in the stream at time t
             redisReply* reply;
 
             char msg_type[30];
@@ -494,7 +457,6 @@ void cc::process_simulation_step()
                 // reply = read_1msg(this->c, "diameter", "cc", *stream_n );
 
 
-                // monitora continuamente i messaggi dai droni
 
                 reply = (redisReply*)redisCommand(c, "XREADGROUP GROUP %s %s COUNT 1 NOACK STREAMS %s >",
                                                   "diameter",
@@ -510,7 +472,6 @@ void cc::process_simulation_step()
                 }
                 get_stream_message_field_value(reply, 0, 0, 1, msg_type); // reading 1 == msg type
 
-                // handle low_battery/charging/recharged
                 handle_msg(msg_type, reply);
                 freeReplyObject(reply);
             }
@@ -528,7 +489,6 @@ void cc::process_simulation_step()
             break;
         }
     default:
-        //no status
         break;
     }
 }
@@ -582,7 +542,7 @@ double cc::calculate_verified_percentage(int curr_time)
 
 
 // Verifica se l'area totale ha raggiunto la soglia minima di copertura (99%)
-bool cc::verify_area(int curr_time)
+bool cc::verify_area(int curr_time) const
 {
     int aa = 0;
     for (int i = 0; i < HEIGHT; i++)
@@ -591,7 +551,6 @@ bool cc::verify_area(int curr_time)
         {
             if (!verified_single_point(grid[i][j], curr_time))
             {
-                //dumpsubarea(curr_time);
                 continue;
             }
             aa++;
@@ -621,7 +580,6 @@ void cc::log_event(int time)
 
 {
 
-    // wait drone statuses for logs bloccante  (this is for the monitor so it can be blocking)
     // Skip se non in stato RUNNING
     if (!(status == RUNNING))
     {
@@ -635,14 +593,11 @@ void cc::log_event(int time)
     static int last_log_count = 0;
 
 
-    //drone log_event e.g. did 123 battery_lvl 89 lvy 30 lvx 90 tv 340 status 0
     for (int i = 0; i < DRONES_COUNT; i++)
     {
 
-        // Legge messaggi dal log_stream
         reply = (redisReply*)redisCommand(c, "XREADGROUP GROUP %s %s COUNT 1 NOACK STREAMS %s >",
                                           "diameter", "cc", log_stream);
-        //dumpReply(reply,0);
         if (reply->elements == 0)
         {
             freeReplyObject(reply);
@@ -653,10 +608,8 @@ void cc::log_event(int time)
 
         char drone_id[8],lvy[8], lvx[8], tv[8], bat[16], stat[2];
 
-        //create job using next coord. and subarea coord.
 
         // Estrae informazioni dal messaggio di log_event
-
         get_stream_message_field_value(reply, 0, 0, 1, drone_id);
         get_stream_message_field_value(reply, 0, 0, 3, bat);
         get_stream_message_field_value(reply, 0, 0, 5, lvy);
@@ -668,7 +621,6 @@ void cc::log_event(int time)
         int did = std::stoi(drone_id);
         if (std::stoi(stat) == 1)
         {
-            //1 == idle
             freeReplyObject(reply);
             continue;
         }
@@ -695,7 +647,7 @@ void cc::log_event(int time)
 
         freeReplyObject(reply);
 
-        // optimize
+
     }
     // // Add summary print
     // if (a != last_log_count) {
@@ -704,10 +656,9 @@ void cc::log_event(int time)
     // }
     //printf("%d drones\n",a);
     // MONITOR AREA: Verifica che l'area verificata non diminuisca
-    bool area_verified1 = area_verified; //verfica allo stato precedente
+    bool area_verified1 = area_verified;
     area_verified = verify_area(time);
     save_to_csv(calculate_verified_percentage(time), time,TEST_PATH);
-    //dumpsubarea(time) ;
     //MONITOR AREA
     assert(area_verified1 ? area_verified: 1); // se l' area diventa verificata non deve mai smettere
 

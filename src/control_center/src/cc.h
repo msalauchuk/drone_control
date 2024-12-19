@@ -86,7 +86,7 @@ class cc
 
 public:
     cc();
-    void init();
+    void init_redis();
     void sync_and_wait();
     void process_simulation_step();
     void initialize_grid();
@@ -102,7 +102,7 @@ public:
     void addDrone(drone drone);
 
     int get_available_drone_id();
-    bool verify_area(int t);
+    bool verify_area(int t) const;
 
 
 
