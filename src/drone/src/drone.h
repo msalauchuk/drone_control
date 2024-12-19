@@ -88,8 +88,9 @@ class DroneFleet {
 
         int block_time = 10000000; //timeout redis msgs
     public:
+        DroneFleet();
         std::vector<drone> drones;
-        void init();
+        void init_redis();
         void addDrone(drone drone);
         void init_drones(int n); // initializes the drones
         void sync_with_control_center(); //sync time w/ redis

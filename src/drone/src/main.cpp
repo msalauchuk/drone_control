@@ -60,13 +60,13 @@ int main() {
         signal(SIGABRT, signal_handler);  // Abort signal
 
         // Initialize drone fleet
-        DroneFleet fleet = DroneFleet();
+
+        DroneFleet fleet;
+        printf("\nInitializing drone fleet simulation...\n");
+        printf("Initialized %d drones successfully\n\n", DRONES_COUNT);
         g_drone_fleet = &fleet;
 
-        printf("\nInitializing drone fleet simulation...\n");
-        fleet.init();
-        fleet.init_drones(DRONES_COUNT);
-        printf("Initialized %d drones successfully\n\n", DRONES_COUNT);
+
 
         // Main simulation loop
         for (int time_step = 0; time_step < TOTAL_SIMULATION_TIME; time_step++) {

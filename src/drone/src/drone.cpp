@@ -34,6 +34,15 @@ last_t_v(-1)
 }
 
 
+DroneFleet::DroneFleet():
+pid (getpid()),
+c(nullptr)
+{
+    init_redis();
+    init_drones(DRONES_COUNT);
+}
+
+
 
 
 void DroneFleet::addDrone(drone drone)
@@ -76,10 +85,9 @@ void DroneFleet::sync_with_control_center()
 
 // Initialize 1000 drones
 // Each drone starts at CC (3000,3000) with 100% battery_lvl
-void DroneFleet::init()
+void DroneFleet::init_redis()
 {
     //set up redis context
-    this->pid = getpid();
     srand(time(NULL));
 
     this->c = redisConnect("127.0.0.1", 6379);
