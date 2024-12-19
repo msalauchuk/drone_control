@@ -65,6 +65,7 @@ public:
     Job * job;
 
     drone(int id);
+    void validate_initial_state() const;
     void tick(redisContext *c,int t);
     double calculate_distance_to_base();
     bool is_fully_charged();

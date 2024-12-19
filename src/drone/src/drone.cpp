@@ -1,21 +1,40 @@
 #include "drone.h"
+
+#include <cassert>
+
 #include "src/redis/src/connector.h"
 #include <hiredis/hiredis.h>
 
 
-
-drone::drone(int did){
-    id = did;
-    battery_lvl = 100,
-    x = CC_X;
-    y = CC_Y;
-    f_status = MOVING_TO_TARGET;
-    speed = (30.0 / 3.6) * T;
-    status = STARTUP;
-    last_v_x = 0;
-    last_v_y = 0;
-    last_t_v = -1;
+void drone::validate_initial_state() const {
+    // Perform basic sanity checks on initial drone configuration
+    assert(battery_lvl == 100 && "Battery level must start at 100%");
+    assert(x == CC_X && y == CC_Y && "Initial position must be command center coordinates");
+    assert(status == STARTUP && "Initial status must be STARTUP");
+    assert(speed > 0 && "Speed must be positive");
 }
+
+
+
+drone::drone(int drone_id):
+id(drone_id),
+battery_lvl(100),
+x(CC_X),
+y(CC_Y),
+f_status(MOVING_TO_TARGET),
+speed((30.0 / 3.6) * T),
+status(STARTUP),
+last_v_x(0),
+last_v_y(0),
+last_t_v(-1)
+{
+    validate_initial_state();
+
+
+}
+
+
+
 
 void DroneFleet::addDrone(drone drone)
 {

@@ -45,9 +45,9 @@ enum DRONE_STATUS
 class drone
 {
 public:
-    explicit drone(int did)
+    explicit drone(int drone_id)
     {
-        this->id = did;
+        this->id = drone_id;
         last_verified_x = -1;
         last_verified_y = -1;
         battery_lvl = 100.0;
