@@ -78,7 +78,7 @@ class cc
     int grid[WIDTH][HEIGHT]; // griglia 2d of time stamps in unix epoch, will be used to calculate verified time
     Status status;
     bool area_verified;
-    redisContext* c; // redis conn
+    redisContext* c;
     const char* drone_ack_stream = "drone_ack";
     const char* drone_stream = "drone_stream";
     const char* log_stream = "log_stream";

@@ -4,6 +4,10 @@ import pandas as pd
 import seaborn as sns
 
 def plot_coverage_analysis(filename, output_filename="system.png"):
+
+    # model timestep
+    T = 2.4
+
     # Set the visual style for better-looking plots
     sns.set_style("whitegrid")
 
@@ -11,7 +15,7 @@ def plot_coverage_analysis(filename, output_filename="system.png"):
     df = pd.read_csv(filename)
 
     # Convert time to minutes for better readability
-    df['minutes'] = df['t'] / 60
+    df['minutes'] = df['t'] * T/ 60
 
     # Create the visualization
     plt.figure(figsize=(12, 7))

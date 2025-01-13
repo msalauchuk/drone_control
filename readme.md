@@ -52,6 +52,21 @@ In another terminal, run the drone simulation:
 ```bash
 ./drone
 ```
+Clean compiled files but keep CMake configuration
+```bash
+make clean
+make
+```
+
+Complete clean rebuild
+```bash
+rm -rf build/*
+cmake ..
+make
+```
+
+
+
 
 To visualize the coverage results:
 
@@ -83,11 +98,11 @@ redis-server --dir ./ --dbfilename dump.rdb
 ## Project Structure
 
 ```
-├── con2redis/src/         # Redis connection handling
-├── control_center/src/    # Control center implementation
-├── drone/src/            # Drone logic implementation  
-├── system/               # System configuration
-└── test/                # Visualization tools
+├── src/redis             # Redis connection handling
+├── src/control_center    # Control center implementation
+├── src/drone             # Drone logic implementation  
+├── src/common/           # System configuration
+└── test/                 # Visualization tools
 ```
 
 ## Contributing

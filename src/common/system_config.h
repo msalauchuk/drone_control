@@ -2,11 +2,17 @@
 #define SYSTEM_CONFIG_H
 
 // Simulation Parameters
+//ci sono diversi parametri che puoi modificare per testare diversi
+//scenari del sistema:
 
-#define TOTAL_SIMULATION_TIME 35540 // Total simulation duration in seconds (approximately 9.87 hours)
+
+
+// Test di Performance
 #define T 2.4               // Time step in seconds
 #define DEBUG 1             // Debug mode flag
 
+//per Test di Scala:
+#define TOTAL_SIMULATION_TIME 35540 // Total simulation duration in seconds (approximately 9.87 hours)
 #define DRONES_COUNT 1000 // Total number of drones in the swarm
 
 
@@ -24,6 +30,7 @@
 // Also synchronizes with 30-minute battery life (750 ticks * 2.4s = 1800s = 30min)
 #define T 2.4
 
+//Test Area di Copertura
 // Grid and Area Parameters
 #define WIDTH 300           // Grid width (20m spacing)
 #define HEIGHT 300          // Grid height
@@ -32,16 +39,15 @@
 #define SUB_AREAS_W 30      // Width of total area in subareas
 #define SUB_AREAS_H 30      // Height of total area in subareas
 
-
+// Test Limiti Operativi
 // Drone Parameters
-#define DRONES_COUNT 1000   // Total number of drones in swarm
 #define MAX_DISTANCE 15000.0 // Maximum flight distance on full battery (meters)
-
 // Safety margin in meters for battery calculations
 // Ensures drone can return to control center with buffer
 #define MARGIN 500
-
 #define MIN_BATTERY 1.0     // Minimum battery level
+
+
 #define MAX_VERIFY_TIME 900 // Maximum verification time (15min)
 
 
