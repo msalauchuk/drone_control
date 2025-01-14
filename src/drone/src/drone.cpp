@@ -53,11 +53,18 @@ void DroneFleet::addDrone(drone drone)
 
 void DroneFleet::init_drones(int n)
 {
+    printf("Initializing drone fleet with %d drones...\n", n);
     for (int i = 0; i < n; i++)
     {
         addDrone(drone(i));
-        printf("init id :%d\n", drones[i].id);
+        printf("Initialized drone[%d]: ID=%d, Position(x=%f,y=%f), Battery=%f%%\n",
+               i,
+               drones[i].id,
+               drones[i].x,
+               drones[i].y,
+               drones[i].battery_lvl);
     }
+    printf("Fleet initialization complete. %d drones ready.\n", n);
 }
 
 void DroneFleet::sync_with_control_center()
@@ -257,14 +264,13 @@ void drone::request_drone_replacement(redisContext* c)
     }
 
 
-    // Calculate how far drone can go before needing to return
+    //how far drone can go before needing to return
     // distanceToCC: distance to Control Center
     // d_last: distance needed to complete pattern
     int temp = distanceToCC - d_last;
 
 
     // Convertire questa distanza in coordinate griglia
-    // Using 11 instead of 10 provides a buffer row that triggers reset
     int move_y = (temp / 11) % 11; // Determina la riga nella griglia
     int nexty;
 
@@ -447,7 +453,7 @@ void drone::update_position(int t)
             if (x <= last_v_x - GRID_SIZE)
             {
                 last_v_x = last_v_x - GRID_SIZE;
-                last_t_v = t; // position verified at time t
+                last_t_v = t; // position verified at time t ****
             }
         }
         else
@@ -506,6 +512,8 @@ void drone::update_state(redisContext* c, int t)
             status = READY;
             break;
         }
+
+
     case READY:
         {
 
@@ -514,12 +522,12 @@ void drone::update_state(redisContext* c, int t)
 
             //printf("drone n: %d\n", id);
 
-            // read drone's personal stream
+            // read drone's personal stream for task ***
             reply = (redisReply*)redisCommand(c, "XREADGROUP GROUP %s %s COUNT 1 NOACK STREAMS %d >",
                                               "diameter", "drones", id);
             validate_reply(c, reply);
 
-            // If no messages, remain idle
+            // If no messages, remain startup
             if (reply->elements == 0)
             {
                 freeReplyObject(reply);
@@ -539,7 +547,7 @@ void drone::update_state(redisContext* c, int t)
     case ON_MISSION:
         {
 
-            // Active task execution state
+            // Active task execution state (update position)
             // go to pos nx ny with velx vely
 
             // if arrived calc next using lawn mowner algo
@@ -561,7 +569,7 @@ void drone::update_state(redisContext* c, int t)
                 break;
             }
             // Continue normal movement pattern
-            this->update_position(t);
+            this->update_position(t); //***
 
             break;
         }
@@ -640,6 +648,7 @@ void DroneFleet::update_fleet_position(int t)
     }
 }
 
+// lo stato dei droni durante la simulazione
 void DroneFleet::log()
 {
     redisReply* reply;
@@ -649,6 +658,9 @@ void DroneFleet::log()
         {
             continue;
         }
+
+        // Invia info sul punto verificato al log_stream ***
+
         reply = RedisCommand(c, "XADD %s * did %d battery_lvl %f lvy %d lvx %d tv %d status %d"
                                           , log_stream, i, drones[i].battery_lvl, drones[i].last_v_y, drones[i].last_v_x
                                           , drones[i].last_t_v, drones[i].status);

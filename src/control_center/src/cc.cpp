@@ -138,11 +138,13 @@ void cc::sync_and_wait()
     // message_id: ID del messaggio ("*" per auto-generazione)
     // type: campo del messaggio
     // message: valore del campo type
+
+    REDIS_LOG("Sending sync message to time_sync stream");
     reply = (redisReply*)redisCommand(c, "XADD %s %s type %s", "time_sync", messageId, syncMessage);
-    if (DEBUG)
-    {
-        //dumpReply(reply,0);
-    }
+    // if (DEBUG)
+    // {
+    //     //dumpReply(reply,0);
+    // }
 
     // Verifica che la risposta sia di tipo stringa (conferma corretta scrittura)
     validate_reply_type(c, reply,REDIS_REPLY_STRING);
@@ -157,7 +159,7 @@ void cc::sync_and_wait()
     // diameter: nome gruppo consumatori
     // cc: ID consumatore
     // syncTimeout: tempo massimo di attesa
-
+    REDIS_LOG("Waiting for drone acknowledgment...");
     //# Lettura bloccante (CC attende risposta)
     reply = stream_read_message_blocking(c, "diameter", "cc", syncTimeout, drone_ack_stream);
 
@@ -557,7 +559,19 @@ bool cc::verify_area(int curr_time) const
             aa++;
         }
     }
-    return ((double)aa / (300.0 * 300.0)) * 100.0 >= 99.0;
+    double coverage = ((double)aa / (300.0 * 300.0)) * 100.0;
+
+    // Se raggiungiamo il 99% di copertura per la prima volta
+    static bool first_time_99 = true;
+    if (coverage >= 99.0 && first_time_99) {
+        printf("\n==========================================\n");
+        printf("RAGGIUNTA COPERTURA DEL 99%% al tempo %d\n", curr_time);
+        printf("Tempo trascorso: %.2f minuti\n", (curr_time * T) / 60.0);
+        printf("==========================================\n");
+        first_time_99 = false;
+    }
+
+    return coverage >= 99.0;
 }
 
 void save_to_csv(double va, int t, std::string filename)
@@ -607,7 +621,9 @@ void cc::log_event(int time)
 
         a++;
 
+        //coordinates x,y , time verified (tempo in cui il punto è stato verificato)
         char drone_id[8],lvy[8], lvx[8], tv[8], bat[16], stat[2];
+
 
 
         // Estrae informazioni dal messaggio di log_event
@@ -627,7 +643,7 @@ void cc::log_event(int time)
         }
         int ilvx = std::stoi(lvx);
         int ilvy = std::stoi(lvy);
-        ilvx = ilvx / 20;
+        ilvx = ilvx / 20; // convert in grid point from m
         ilvy = ilvy / 20;
         drones[did].battery_lvl = std::stod(bat);
 
@@ -643,6 +659,15 @@ void cc::log_event(int time)
             grid[ilvy][ilvx] = ltv; //setting last_time verified in order to check verif
             drones[did].last_verified_x = ilvx;
             drones[did].last_verified_y = ilvy;
+
+            // lvx = "340"
+            // lvy = "250"
+            // tv  = "100"
+            // did = 5  // ID del drone
+            //
+            // ilvx = 340 / 20 = 17  // Coordinata X nella griglia
+            // ilvy = 250 / 20 = 12  // Coordinata Y nella griglia
+            // ltv  = 100            // Tempo di verifica
         }
 
 

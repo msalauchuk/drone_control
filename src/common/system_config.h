@@ -12,7 +12,7 @@
 #define DEBUG 1             // Debug mode flag
 
 //per Test di Scala:
-#define TOTAL_SIMULATION_TIME 35540 // Total simulation duration in seconds (approximately 9.87 hours)
+#define TOTAL_SIMULATION_TIME 28800 // Total simulation duration in seconds (8 hours)
 #define DRONES_COUNT 1000 // Total number of drones in the swarm
 
 
@@ -65,6 +65,15 @@
 
 // Test Configuration
 #define TEST_PATH "../test/system.csv"
+
+
+#define DEBUG_REDIS 1  // Set to 1 to show Redis messages, 0 to hide them
+
+// Simple macro for Redis debug messages
+#define REDIS_LOG(format, ...) \
+if (DEBUG_REDIS) { \
+printf("[REDIS] " format "\n", ##__VA_ARGS__); \
+}
 
 
 #endif
